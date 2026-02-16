@@ -13,7 +13,7 @@
       --interac-gold-dark: #d1a302;
       --bg-color: #f0f2f5;
       --success-green: #28a745;
-      --gray-muted: #555; 
+      --gray-muted: #444; /* Darker gray for finished lessons */
       --line-color: #e0e0e0;
     }
     html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); font-family: 'Inter', sans-serif; }
@@ -26,53 +26,48 @@
     button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
     table { width: 100%; border-collapse: collapse; min-width: 1500px; }
-    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; letter-spacing: 0.05em; }
-    th:last-child { border-right: none; }
+    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; }
     td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid var(--line-color); text-align: center; font-size: 12.5px; }
     .bold-col { font-weight: 700; color: #000; }
-    tr:hover { background-color: #fffdec; }
-    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted); }
-    .finished-row .bold-col { color: var(--gray-muted); }
+    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted) !important; }
+    .finished-row .bold-col { color: var(--gray-muted) !important; }
     .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
     .badge-upcoming { background: #e6ffed; color: var(--success-green); border: 1px solid #b7eb8f; }
-    .badge-finished { background: #e0e0e0; color: #444; border: 1px solid #ccc; }
-    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
-    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; word-break: break-all; display: inline-block; max-width: 200px; }
-    .link-disabled { color: #999 !important; text-decoration: none !important; cursor: not-allowed; font-weight: 400; }
-    .btn-disabled { background: #ccc !important; color: #777 !important; cursor: not-allowed; }
+    .badge-finished { background: #d0d0d0; color: #444; border: 1px solid #999; }
+    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
+    .btn-disabled { background: #999 !important; color: #fff !important; cursor: not-allowed; }
+    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header-section">
       <h2>INTERAC TEACHERS TRACKER</h2>
-      <div class="date-note" id="date-range-note">Loading window...</div>
+      <div class="date-note" id="date-range-note">Loading...</div>
       <div class="search-area">
-        <input type="text" id="q" placeholder="Enter your Teacher's Name. Ex. Clayd" onkeypress="if(event.key==='Enter') doSearch()">
-        <button id="btn" onclick="doSearch()">Search</button>
+        <input type="text" id="q" placeholder="Enter Teacher Name" onkeypress="if(event.key==='Enter') doSearch()">
+        <button onclick="doSearch()">Search</button>
       </div>
     </div>
-    <div id="results-container" class="table-wrapper">
-      <div id="results"></div>
-    </div>
+    <div id="results-container" class="table-wrapper"><div id="results"></div></div>
   </div>
 
   <script>
-    // !! REPLACE THIS URL WITH YOUR GOOGLE SCRIPT DEPLOYMENT URL !!
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2BFiLpTi0Ge06eHSgCJTqBmk9O5cttrmE13fwA3kFhKzT-qdNQtnR5GDHSgR-uL7o/exec";
+    // 1. REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJ2ubtRnaNmpr5N3ADBvl-mlfcAERmNaZOnqLtlzKx1VG6CkO0OyxJCZLypmF2bieZ0Q/exec";
 
-    window.onload = function() {
-      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    window.onload = () => {
       const today = new Date();
       const future = new Date();
       future.setDate(today.getDate() + 14);
-      document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      document.getElementById('date-range-note').innerHTML = `Displaying: <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
     };
 
-    function confirmMaterial(url, materialName, time, studentName, area) {
+    function confirmMaterial(url, materialName, fullTime, studentName, area) {
       Swal.fire({
         title: 'Material Check',
-        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${time}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.<br><br><small style="color:#888">Material: ${materialName}</small>`,
+        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${fullTime}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.`,
         icon: 'info',
         showCancelButton: true,
         confirmButtonColor: '#fbbc04',
@@ -84,97 +79,61 @@
     async function doSearch() {
       const q = document.getElementById('q').value.trim();
       if(!q) return;
-
-      Swal.fire({ title: 'Checking Schedule', html: 'Scanning for <b>' + q + '</b>...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
-
+      Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      
       try {
-        // VERCEL FETCH LOGIC
         const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(q)}`);
         const data = await response.json();
-
         if(!data.rows || data.rows.length === 0) {
-          Swal.fire({ icon: 'error', title: 'No Lessons Found' });
+          Swal.fire({ icon: 'error', title: 'No Results' });
           document.getElementById('results').innerHTML = "";
           return;
         }
         Swal.close();
         render(data.rows);
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Please ensure your Google Script is deployed as "Anyone".' });
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Database connection failed.' });
       }
     }
 
     function render(rows) {
       const now = new Date();
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student", "FB Form", "Type", "Area", "School", "Grade", "Class"];
-      
-      let html = '<table><thead><tr>';
-      headers.forEach(txt => html += '<th>' + txt + '</th>');
-      html += '</tr></thead><tbody>';
+      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
       
       rows.forEach(r => {
-        let dateDisplay = r[0];
-        let lessonEnd;
-        const currentYear = new Date().getFullYear();
-
-        if (typeof r[0] === 'string' && r[0].includes('-')) {
-          const parts = r[0].split('-'); 
-          const day = parseInt(parts[2]);
-          const monthIdx = parseInt(parts[1]) - 1;
-          dateDisplay = day + "/" + monthNames[monthIdx];
-          lessonEnd = new Date(parts[0], monthIdx, day, parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
-        } else {
-          const dateParts = r[0].split('/'); 
-          const monthIndex = monthNames.indexOf(dateParts[1]);
-          lessonEnd = new Date(currentYear, monthIndex, parseInt(dateParts[0]), parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
-        }
-        
+        // Use End Time (Index 3) for the "Finished" logic
+        const lessonEnd = new Date(`${r[0]} ${r[3]}`);
         const isFinished = lessonEnd < now;
         const rowClass = isFinished ? 'class="finished-row"' : '';
         const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
 
-        html += `<tr ${rowClass}><td>${badge}</td>`;
+        // Custom Time String: Access Time (r[1]) + Start (r[2]) ~ End (r[3])
+        const fullTimeStr = `${r[1]}  ${r[2]}~${r[3]}`;
 
+        html += `<tr ${rowClass}><td>${badge}</td>`;
+        
         r.forEach((cell, i) => {
           let content = cell || "-";
-          if (i === 0) content = dateDisplay;
-          const boldClass = (i === 0 || i === 3 || i === 4) ? 'class="bold-col"' : '';
-
-          if (content && String(content).includes('http')) {
-            if (i === 5) {
-              if (isFinished) {
-                html += `<td ${boldClass}><span class="btn-link btn-disabled">Link Closed</span></td>`;
-              } else {
-                const materialName = r[4] || "Material";
-                const time = r[3] || "Time";
-                const student = r[8] || "Student";
-                const area = r[11] || "the Area"; 
-                html += `<td ${boldClass}><button class="btn-link" onclick="confirmMaterial('${content}', '${materialName}', '${time}', '${student}', '${area}')">Open Link</button></td>`;
-              }
-            } else if (i === 9) {
-               if (isFinished) {
-                html += `<td ${boldClass}><span class="btn-link btn-disabled">Link Closed</span></td>`;
-              } else {
-                html += `<td ${boldClass}><a class="btn-link" href="${content}" target="_blank">Open Link</a></td>`;
-              }
-            } else if (i === 6) {
-              if (isFinished) {
-                html += `<td ${boldClass}><span class="link-disabled">Meeting Ended</span></td>`;
-              } else {
-                html += `<td ${boldClass}><a class="raw-link" href="${content}" target="_blank">${content}</a></td>`;
-              }
-            } else {
-              html += `<td ${boldClass}>${content}</td>`;
-            }
+          // Bolding specific columns: Date(0), Access(1), Start(2), End(3)
+          const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
+          
+          if (content.toString().includes('http')) {
+             if (i === 5) { // Material URL
+                const matName = r[4]; const std = r[8]; const area = r[11];
+                html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}','${matName}','${fullTimeStr}','${std}','${area}')">Open</button></td>`;
+             } else if (i === 9) { // FB Form
+                html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
+             } else { // Meeting URL or others
+                html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
+             }
           } else {
-            html += `<td ${boldClass}>${content}</td>`;
+             html += `<td ${boldClass}>${content}</td>`;
           }
         });
         html += '</tr>';
       });
-      html += '</tbody></table>';
-      document.getElementById('results').innerHTML = html;
+      document.getElementById('results').innerHTML = html + '</tbody></table>';
     }
   </script>
 </body>
