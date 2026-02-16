@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INTERAC TEACHER TRACKER</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    :root {
+      --primary-blue: #1a73e8;
+      --interac-gold: #fbbc04;
+      --interac-gold-dark: #d1a302;
+      --bg-color: #f0f2f5;
+      --success-green: #28a745;
+      --gray-muted: #555; 
+      --line-color: #e0e0e0;
+    }
+    html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); font-family: 'Inter', sans-serif; }
+    .container { width: 100%; min-height: 100vh; background: white; display: flex; flex-direction: column; box-sizing: border-box; }
+    .header-section { padding: 20px; background: white; border-bottom: 1px solid #eee; text-align: center; }
+    .header-section h2 { color: var(--primary-blue); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
+    .date-note { font-size: 13px; color: #666; margin-bottom: 20px; font-weight: 500; }
+    .search-area { display: flex; justify-content: center; gap: 10px; padding-bottom: 10px; }
+    input[type="text"] { padding: 12px 16px; width: 100%; max-width: 450px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
+    button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
+    table { width: 100%; border-collapse: collapse; min-width: 1500px; }
+    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; letter-spacing: 0.05em; }
+    th:last-child { border-right: none; }
+    td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid var(--line-color); text-align: center; font-size: 12.5px; }
+    .bold-col { font-weight: 700; color: #000; }
+    tr:hover { background-color: #fffdec; }
+    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted); }
+    .finished-row .bold-col { color: var(--gray-muted); }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .badge-upcoming { background: #e6ffed; color: var(--success-green); border: 1px solid #b7eb8f; }
+    .badge-finished { background: #e0e0e0; color: #444; border: 1px solid #ccc; }
+    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
+    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; word-break: break-all; display: inline-block; max-width: 200px; }
+    .link-disabled { color: #999 !important; text-decoration: none !important; cursor: not-allowed; font-weight: 400; }
+    .btn-disabled { background: #ccc !important; color: #777 !important; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section">
+      <h2>INTERAC TEACHERS TRACKER</h2>
+      <div class="date-note" id="date-range-note">Loading window...</div>
+      <div class="search-area">
+        <input type="text" id="q" placeholder="Enter your Teacher's Name. Ex. Clayd" onkeypress="if(event.key==='Enter') doSearch()">
+        <button id="btn" onclick="doSearch()">Search</button>
+      </div>
+    </div>
+    <div id="results-container" class="table-wrapper">
+      <div id="results"></div>
+    </div>
+  </div>
+
+  <script>
+    // !! REPLACE THIS URL WITH YOUR GOOGLE SCRIPT DEPLOYMENT URL !!
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2BFiLpTi0Ge06eHSgCJTqBmk9O5cttrmE13fwA3kFhKzT-qdNQtnR5GDHSgR-uL7o/exec";
+
+    window.onload = function() {
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const today = new Date();
+      const future = new Date();
+      future.setDate(today.getDate() + 14);
+      document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+    };
+
+    function confirmMaterial(url, materialName, time, studentName, area) {
+      Swal.fire({
+        title: 'Material Check',
+        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${time}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.<br><br><small style="color:#888">Material: ${materialName}</small>`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#fbbc04',
+        confirmButtonText: '<span style="color:#000">OK, Open it</span>',
+        cancelButtonText: 'Cancel'
+      }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
+    }
+
+    async function doSearch() {
+      const q = document.getElementById('q').value.trim();
+      if(!q) return;
+
+      Swal.fire({ title: 'Checking Schedule', html: 'Scanning for <b>' + q + '</b>...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+      try {
+        // VERCEL FETCH LOGIC
+        const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(q)}`);
+        const data = await response.json();
+
+        if(!data.rows || data.rows.length === 0) {
+          Swal.fire({ icon: 'error', title: 'No Lessons Found' });
+          document.getElementById('results').innerHTML = "";
+          return;
+        }
+        Swal.close();
+        render(data.rows);
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Please ensure your Google Script is deployed as "Anyone".' });
+      }
+    }
+
+    function render(rows) {
+      const now = new Date();
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student", "FB Form", "Type", "Area", "School", "Grade", "Class"];
+      
+      let html = '<table><thead><tr>';
+      headers.forEach(txt => html += '<th>' + txt + '</th>');
+      html += '</tr></thead><tbody>';
+      
+      rows.forEach(r => {
+        let dateDisplay = r[0];
+        let lessonEnd;
+        const currentYear = new Date().getFullYear();
+
+        if (typeof r[0] === 'string' && r[0].includes('-')) {
+          const parts = r[0].split('-'); 
+          const day = parseInt(parts[2]);
+          const monthIdx = parseInt(parts[1]) - 1;
+          dateDisplay = day + "/" + monthNames[monthIdx];
+          lessonEnd = new Date(parts[0], monthIdx, day, parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
+        } else {
+          const dateParts = r[0].split('/'); 
+          const monthIndex = monthNames.indexOf(dateParts[1]);
+          lessonEnd = new Date(currentYear, monthIndex, parseInt(dateParts[0]), parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
+        }
+        
+        const isFinished = lessonEnd < now;
+        const rowClass = isFinished ? 'class="finished-row"' : '';
+        const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
+
+        html += `<tr ${rowClass}><td>${badge}</td>`;
+
+        r.forEach((cell, i) => {
+          let content = cell || "-";
+          if (i === 0) content = dateDisplay;
+          const boldClass = (i === 0 || i === 3 || i === 4) ? 'class="bold-col"' : '';
+
+          if (content && String(content).includes('http')) {
+            if (i === 5) {
+              if (isFinished) {
+                html += `<td ${boldClass}><span class="btn-link btn-disabled">Link Closed</span></td>`;
+              } else {
+                const materialName = r[4] || "Material";
+                const time = r[3] || "Time";
+                const student = r[8] || "Student";
+                const area = r[11] || "the Area"; 
+                html += `<td ${boldClass}><button class="btn-link" onclick="confirmMaterial('${content}', '${materialName}', '${time}', '${student}', '${area}')">Open Link</button></td>`;
+              }
+            } else if (i === 9) {
+               if (isFinished) {
+                html += `<td ${boldClass}><span class="btn-link btn-disabled">Link Closed</span></td>`;
+              } else {
+                html += `<td ${boldClass}><a class="btn-link" href="${content}" target="_blank">Open Link</a></td>`;
+              }
+            } else if (i === 6) {
+              if (isFinished) {
+                html += `<td ${boldClass}><span class="link-disabled">Meeting Ended</span></td>`;
+              } else {
+                html += `<td ${boldClass}><a class="raw-link" href="${content}" target="_blank">${content}</a></td>`;
+              }
+            } else {
+              html += `<td ${boldClass}>${content}</td>`;
+            }
+          } else {
+            html += `<td ${boldClass}>${content}</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('results').innerHTML = html;
+    }
+  </script>
+</body>
+</html>
