@@ -13,7 +13,7 @@
       --interac-gold-dark: #d1a302;
       --bg-color: #f0f2f5;
       --success-green: #28a745;
-      --gray-muted: #444; /* Darker gray for finished lessons */
+      --gray-muted: #555; 
       --line-color: #e0e0e0;
     }
     html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); font-family: 'Inter', sans-serif; }
@@ -26,48 +26,47 @@
     button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
     table { width: 100%; border-collapse: collapse; min-width: 1500px; }
-    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; }
+    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; letter-spacing: 0.05em; }
     td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid var(--line-color); text-align: center; font-size: 12.5px; }
     .bold-col { font-weight: 700; color: #000; }
-    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted) !important; }
-    .finished-row .bold-col { color: var(--gray-muted) !important; }
+    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted); }
     .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
     .badge-upcoming { background: #e6ffed; color: var(--success-green); border: 1px solid #b7eb8f; }
-    .badge-finished { background: #d0d0d0; color: #444; border: 1px solid #999; }
-    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
-    .btn-disabled { background: #999 !important; color: #fff !important; cursor: not-allowed; }
+    .badge-finished { background: #e0e0e0; color: #444; border: 1px solid #ccc; }
+    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
     .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; }
+    .btn-disabled { background: #ccc !important; color: #777 !important; cursor: not-allowed; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header-section">
       <h2>INTERAC TEACHERS TRACKER</h2>
-      <div class="date-note" id="date-range-note">Loading...</div>
+      <div class="date-note" id="date-range-note">Loading window...</div>
       <div class="search-area">
         <input type="text" id="q" placeholder="Enter Teacher Name" onkeypress="if(event.key==='Enter') doSearch()">
-        <button onclick="doSearch()">Search</button>
+        <button id="btn" onclick="doSearch()">Search</button>
       </div>
     </div>
     <div id="results-container" class="table-wrapper"><div id="results"></div></div>
   </div>
 
   <script>
-    // 1. REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJ2ubtRnaNmpr5N3ADBvl-mlfcAERmNaZOnqLtlzKx1VG6CkO0OyxJCZLypmF2bieZ0Q/exec";
+    const WEB_APP_URL = "PASTE_YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE";
 
-    window.onload = () => {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    window.onload = function() {
       const today = new Date();
       const future = new Date();
       future.setDate(today.getDate() + 14);
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      document.getElementById('date-range-note').innerHTML = `Displaying: <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+      document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
     };
 
-    function confirmMaterial(url, materialName, fullTime, studentName, area) {
+    function confirmMaterial(url, materialName, timeStr, studentName, area) {
       Swal.fire({
         title: 'Material Check',
-        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${fullTime}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.`,
+        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${timeStr}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.<br><br><small style="color:#888">Material: ${materialName}</small>`,
         icon: 'info',
         showCancelButton: true,
         confirmButtonColor: '#fbbc04',
@@ -80,20 +79,17 @@
       const q = document.getElementById('q').value.trim();
       if(!q) return;
       Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      
       try {
         const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(q)}`);
         const data = await response.json();
         if(!data.rows || data.rows.length === 0) {
-          Swal.fire({ icon: 'error', title: 'No Results' });
+          Swal.fire({ icon: 'error', title: 'No Lessons Found' });
           document.getElementById('results').innerHTML = "";
           return;
         }
         Swal.close();
         render(data.rows);
-      } catch (e) {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Database connection failed.' });
-      }
+      } catch (err) { Swal.fire({ icon: 'error', title: 'Connection Error' }); }
     }
 
     function render(rows) {
@@ -102,34 +98,36 @@
       let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
       
       rows.forEach(r => {
-        // Use End Time (Index 3) for the "Finished" logic
-        const lessonEnd = new Date(`${r[0]} ${r[3]}`);
+        // Transform Date 2026/02/19 -> 19/February
+        const dateParts = r[0].split('/');
+        const day = parseInt(dateParts[2]);
+        const monthName = months[parseInt(dateParts[1]) - 1];
+        const dateDisplay = `${day}/${monthName}`;
+
+        // Create Full Time String for Alert
+        const fullTimeStr = `${r[1]} ${r[2]}~${r[3]}`;
+
+        const lessonEnd = new Date(dateParts[0], parseInt(dateParts[1]) - 1, day, parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
         const isFinished = lessonEnd < now;
         const rowClass = isFinished ? 'class="finished-row"' : '';
         const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
-
-        // Custom Time String: Access Time (r[1]) + Start (r[2]) ~ End (r[3])
-        const fullTimeStr = `${r[1]}  ${r[2]}~${r[3]}`;
 
         html += `<tr ${rowClass}><td>${badge}</td>`;
         
         r.forEach((cell, i) => {
           let content = cell || "-";
-          // Bolding specific columns: Date(0), Access(1), Start(2), End(3)
+          if (i === 0) content = dateDisplay;
           const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
-          
+
           if (content.toString().includes('http')) {
-             if (i === 5) { // Material URL
-                const matName = r[4]; const std = r[8]; const area = r[11];
-                html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}','${matName}','${fullTimeStr}','${std}','${area}')">Open</button></td>`;
-             } else if (i === 9) { // FB Form
-                html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
-             } else { // Meeting URL or others
-                html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
-             }
-          } else {
-             html += `<td ${boldClass}>${content}</td>`;
-          }
+            if (i === 5) {
+              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[11]}')">Open</button></td>`;
+            } else if (i === 9) {
+              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
+            } else if (i === 6) {
+              html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
+            } else { html += `<td>${content}</td>`; }
+          } else { html += `<td ${boldClass}>${content}</td>`; }
         });
         html += '</tr>';
       });
