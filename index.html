@@ -124,7 +124,7 @@
             if (i === 5) {
               html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[11]}')">Open</button></td>`;
             } else if (i === 9) {
-              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
+              html += `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
             } else if (i === 6) {
               html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
             } else { html += `<td>${content}</td>`; }
