@@ -95,7 +95,7 @@
 
     function render(rows) {
       const now = new Date();
-      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student", "FB Form", "Type", "Area", "School", "Grade", "Class"];
+      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
       let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
       
       rows.forEach(r => {
