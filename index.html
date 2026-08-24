@@ -76,7 +76,7 @@
       }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
     }
 
-    function formatGoogleDate(val) {
+    function formatCellDate(val) {
       if (!val) return "";
       if (typeof val === 'string' && val.startsWith('Date(')) {
         const parts = val.match(/\d+/g);
@@ -87,14 +87,7 @@
           return `${year}/${month}/${day}`;
         }
       }
-      return val;
-    }
-
-    function formatDateForQuery(dateObj) {
-      const yyyy = dateObj.getFullYear();
-      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const dd = String(dateObj.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
+      return String(val);
     }
 
     async function doSearch() {
@@ -103,20 +96,13 @@
 
       Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      // Calculate Today & 14 days later for SQL Filter
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const future = new Date();
-      future.setDate(today.getDate() + 14);
-      future.setHours(23, 59, 59, 999);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const twoWeeksLater = today + (14 * 24 * 60 * 60 * 1000);
 
-      const startDateStr = formatDateForQuery(today);
-      const endDateStr = formatDateForQuery(future);
-
-      // Query specifically selects columns corresponding to your original Apps Script layout:
+      // Select columns mapping to your sheet layout:
       // C=Date, D=Access, E=Start, F=End, S=MatName, T=MatURL, R=MeetURL, N=Teacher, M=Student, O=Password, U=FBForm, G=Type, H=Area, I=School, J=Grade, K=Class, L=Period
-      const queryStr = `SELECT C, D, E, F, S, T, R, N, M, O, U, G, H, I, J, K, L WHERE lower(N) contains lower('${q.replace(/'/g, "\\'")}') AND C >= date '${startDateStr}' AND C <= date '${endDateStr}' ORDER BY C ASC`;
-
+      const queryStr = `SELECT C, D, E, F, S, T, R, N, M, O, U, G, H, I, J, K, L WHERE lower(N) contains lower('${q.replace(/'/g, "\\'")}')`;
       const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent(queryStr)}`;
 
       try {
@@ -133,19 +119,44 @@
           return;
         }
 
-        const rows = gvizData.table.rows.map(r => {
-          return r.c.map((cell, idx) => {
+        const filteredRows = [];
+
+        gvizData.table.rows.forEach(r => {
+          const rowData = r.c.map((cell, idx) => {
             if (!cell) return "";
-            if (idx === 0) return formatGoogleDate(cell.v); // Date C
+            if (idx === 0) return formatCellDate(cell.v);
             return cell.f || cell.v || "";
           });
+
+          // Check if date falls in 14-day window
+          const rawDateStr = rowData[0];
+          const parsedDate = new Date(rawDateStr);
+
+          if (!isNaN(parsedDate.getTime())) {
+            const lessonTime = parsedDate.getTime();
+            if (lessonTime >= today && lessonTime <= twoWeeksLater) {
+              filteredRows.push(rowData);
+            }
+          } else {
+            // Fallback: If date parsing fails, keep the row so data isn't hidden
+            filteredRows.push(rowData);
+          }
         });
 
+        if (filteredRows.length === 0) {
+          Swal.fire({ icon: 'error', title: 'No Lessons Found', text: 'Teacher exists, but no upcoming lessons in the 14-day window.' });
+          document.getElementById('results').innerHTML = "";
+          return;
+        }
+
+        // Sort rows by Date ascending
+        filteredRows.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
         Swal.close();
-        render(rows);
+        render(filteredRows);
       } catch (err) {
         console.error(err);
-        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data directly from Google Sheets.' });
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data from Google Sheets.' });
       }
     }
 
