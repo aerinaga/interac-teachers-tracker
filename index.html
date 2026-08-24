@@ -55,7 +55,7 @@
 
   <script>
     const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
-    const GID = "174347453"; 
+    const SHEET_TAB_NAME = "Lesson Info for Interact"; 
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     window.onload = function() {
@@ -95,9 +95,9 @@
       const q = document.getElementById('q').value.trim();
       if (!q) return;
 
-      Swal.fire({ title: 'Testing connection...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const testUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tqx=out:json`;
+      const testUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:json`;
 
       try {
         const response = await fetch(testUrl);
@@ -106,7 +106,7 @@
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
         
         if (!jsonMatch) {
-          Swal.fire({ icon: 'error', title: 'Connection Blocked', text: 'Google Sheets returned an unreadable response. Check tab sharing.' });
+          Swal.fire({ icon: 'error', title: 'Connection Blocked', text: 'Google Sheets returned an unreadable response.' });
           return;
         }
 
@@ -120,7 +120,7 @@
         const allRows = gvizData.table.rows;
 
         if (!allRows || allRows.length === 0) {
-          Swal.fire({ icon: 'warning', title: 'Sheet is Empty', text: 'Connected to the sheet, but no rows were found on this tab (gid).' });
+          Swal.fire({ icon: 'warning', title: 'Sheet Tab is Empty', text: `No rows were found on tab "${SHEET_TAB_NAME}".` });
           return;
         }
 
@@ -131,8 +131,8 @@
           if (!r.c) return;
           const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
           
-          // Column N is index 13 (0-based)
-          const teacher = String(rowVals[13] || "").toLowerCase();
+          // Column P is index 15 (0-based: A=0... P=15)
+          const teacher = String(rowVals[15] || "").toLowerCase();
 
           if (teacher.includes(search)) {
             matchedRows.push([
@@ -140,13 +140,13 @@
               rowVals[3],                  // Access (Col D)
               rowVals[4],                  // Start (Col E)
               rowVals[5],                  // End (Col F)
-              rowVals[18],                 // Material Name (Col S)
-              rowVals[19],                 // Material URL (Col T)
-              rowVals[17],                 // Meeting URL (Col R)
-              rowVals[13],                 // Teacher (Col N)
-              rowVals[12],                 // Student (Col M)
+              rowVals[19],                 // Material Name (Col T)
+              rowVals[20],                 // Material URL (Col U)
+              rowVals[18],                 // Meeting URL (Col S)
+              rowVals[15],                 // Teacher (Col P)
+              rowVals[13],                 // Student (Col N)
               rowVals[14],                 // Password (Col O)
-              rowVals[20],                 // FB Form (Col U)
+              rowVals[21],                 // FB Form (Col V)
               rowVals[6],                  // Type (Col G)
               rowVals[7],                  // Area (Col H)
               rowVals[8],                  // School (Col I)
@@ -160,8 +160,8 @@
         if (matchedRows.length === 0) {
           Swal.fire({ 
             icon: 'info', 
-            title: 'Connected successfully!', 
-            text: `Connected to sheet tab (${allRows.length} total rows found), but no rows match "${q}" in Column N.` 
+            title: 'No Lessons Found', 
+            text: `No lessons found for "${q}" in Column P on tab "${SHEET_TAB_NAME}".` 
           });
           document.getElementById('results').innerHTML = "";
           return;
