@@ -35,7 +35,7 @@
     .badge-upcoming { background: #e6ffed; color: var(--success-green); border: 1px solid #b7eb8f; }
     .badge-finished { background: #e0e0e0; color: #444; border: 1px solid #ccc; }
     .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
-    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; }
+    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 11px; font-weight: 700; cursor: pointer; background: none; border: none; }
     .btn-disabled { background: #ccc !important; color: #777 !important; cursor: not-allowed; }
   </style>
 </head>
@@ -45,7 +45,7 @@
       <h2>INTERAC TEACHERS TRACKER</h2>
       <div class="date-note" id="date-range-note">Loading window...</div>
       <div class="search-area">
-        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Clayd)" onkeypress="if(event.key==='Enter') doSearch()">
+        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Meann)" onkeypress="if(event.key==='Enter') doSearch()">
         <button id="btn" onclick="doSearch()">Search</button>
       </div>
       <div class="search-note">Type your Teacher's Name only do not add Teacher in the beginning.</div>
@@ -73,6 +73,18 @@
         showCancelButton: true,
         confirmButtonColor: '#fbbc04',
         confirmButtonText: '<span style="color:#000">OK, Open it</span>',
+        cancelButtonText: 'Cancel'
+      }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
+    }
+
+    function confirmMeeting(url, timeStr, studentName, area) {
+      Swal.fire({
+        title: 'Meeting Link Check',
+        html: `You are entering the meeting for your <b>${timeStr}</b> lesson<br>with <b>${studentName}</b> (${area}).<br><br><small style="color:#888">Please verify your session details before joining.</small>`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#1a73e8',
+        confirmButtonText: 'Join Meeting',
         cancelButtonText: 'Cancel'
       }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
     }
@@ -134,7 +146,6 @@
           // Column P is index 15 (0-based: A=0... P=15)
           const teacher = String(rowVals[15] || "").trim().toLowerCase();
 
-          // Strict exact match comparison: ensures "Anne" won't match inside "Jannessah"
           if (teacher === search) {
             matchedRows.push([
               formatCellDate(rowVals[2]),  // Date (Col C)
@@ -217,10 +228,10 @@
           if (String(content).includes('http')) {
             if (i === 5) { // Material URL
               html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Open</button></td>`;
+            } else if (i === 6) { // Meeting URL
+              html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><button class="raw-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Link</button></td>`;
             } else if (i === 10) { // FB Form
               html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
-            } else if (i === 6) { // Meeting URL
-              html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
             } else { 
               html += `<td>${content}</td>`; 
             }
