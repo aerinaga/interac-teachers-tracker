@@ -1,214 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INTERAC TEACHER TRACKER</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-    :root {
-      --primary-blue: #1a73e8;
-      --interac-gold: #fbbc04;
-      --interac-gold-dark: #d1a302;
-      --bg-color: #f0f2f5;
-      --success-green: #28a745;
-      --gray-muted: #555; 
-      --line-color: #e0e0e0;
-    }
-    html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); font-family: 'Inter', sans-serif; }
-    .container { width: 100%; min-height: 100vh; background: white; display: flex; flex-direction: column; box-sizing: border-box; }
-    .header-section { padding: 20px; background: white; border-bottom: 1px solid #eee; text-align: center; }
-    .header-section h2 { color: var(--primary-blue); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
-    .date-note { font-size: 13px; color: #666; margin-bottom: 20px; font-weight: 500; }
-    .search-area { display: flex; justify-content: center; gap: 10px; padding-bottom: 10px; }
-    .search-note { font-size: 12px; color: #888; }
-    input[type="text"] { padding: 12px 16px; width: 100%; max-width: 450px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
-    button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-    .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
-    table { width: 100%; border-collapse: collapse; min-width: 1600px; }
-    th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; letter-spacing: 0.05em; }
-    td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid var(--line-color); text-align: center; font-size: 12.5px; }
-    .bold-col { font-weight: 700; color: #000; }
-    .finished-row { background-color: #f2f2f2 !important; color: var(--gray-muted); }
-    .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-    .badge-upcoming { background: #e6ffed; color: var(--success-green); border: 1px solid #b7eb8f; }
-    .badge-finished { background: #e0e0e0; color: #444; border: 1px solid #ccc; }
-    .btn-link { background: var(--primary-blue); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; cursor: pointer; border:none; }
-    .raw-link { color: var(--primary-blue); text-decoration: underline; font-size: 10px; }
-    .btn-disabled { background: #ccc !important; color: #777 !important; cursor: not-allowed; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header-section">
-      <h2>INTERAC TEACHERS TRACKER</h2>
-      <div class="date-note" id="date-range-note">Loading window...</div>
-      <div class="search-area">
-        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Meann)" onkeypress="if(event.key==='Enter') doSearch()">
-        <button id="btn" onclick="doSearch()">Search</button>
-      </div>
-      <div class="search-note">Type your Teacher's Name only do not add Teacher in the beginning.</div>
-    </div>
-    <div id="results-container" class="table-wrapper"><div id="results"></div></div>
-  </div>
-
-  <script>
-    const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
-    const GID = "174347453"; // Direct GID targeting your active sheet tab
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-    window.onload = function() {
-      const today = new Date();
-      const future = new Date();
-      future.setDate(today.getDate() + 14);
-      document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
-    };
-
-    function confirmMaterial(url, materialName, timeStr, studentName, area) {
-      Swal.fire({
-        title: 'Material Check',
-        html: `You are going to use <b>"${materialName}"</b><br>for your <b>${timeStr}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.<br><br><small style="color:#888">Material: ${materialName}</small>`,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#fbbc04',
-        confirmButtonText: '<span style="color:#000">OK, Open it</span>',
-        cancelButtonText: 'Cancel'
-      }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
-    }
-
-    function formatCellDate(val) {
-      if (!val) return "";
-      if (typeof val === 'string' && val.startsWith('Date(')) {
-        const parts = val.match(/\d+/g);
-        if (parts) {
-          const year = parts[0];
-          const month = String(parseInt(parts[1]) + 1).padStart(2, '0');
-          const day = String(parts[2]).padStart(2, '0');
-          return `${year}/${month}/${day}`;
-        }
-      }
-      return String(val);
-    }
-
-    async function doSearch() {
+async function doSearch() {
       const q = document.getElementById('q').value.trim();
       if (!q) return;
 
-      Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      Swal.fire({ title: 'Testing connection...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      const twoWeeksLater = today + (14 * 24 * 60 * 60 * 1000);
-
-      // Selects: C=Date, D=Access, E=Start, F=End, S=MatName, T=MatURL, R=MeetURL, N=Teacher, M=Student, O=Password, U=FBForm, G=Type, H=Area, I=School, J=Grade, K=Class, L=Period
-      const queryStr = `SELECT C, D, E, F, S, T, R, N, M, O, U, G, H, I, J, K, L WHERE lower(N) contains lower('${q.replace(/'/g, "\\'")}')`;
-      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tq=${encodeURIComponent(queryStr)}`;
+      // Pulls raw data without SQL filtering to verify connectivity
+      const testUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tqx=out:json`;
 
       try {
-        const response = await fetch(tqUrl);
+        const response = await fetch(testUrl);
         const text = await response.text();
         
+        // Extract JSON from Google's wrapper function
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-        if (!jsonMatch) throw new Error("Invalid response");
         
-        const gvizData = JSON.parse(jsonMatch[1]);
-        if (!gvizData.table || !gvizData.table.rows || gvizData.table.rows.length === 0) {
-          Swal.fire({ icon: 'error', title: 'No Lessons Found' });
-          document.getElementById('results').innerHTML = "";
+        if (!jsonMatch) {
+          Swal.fire({ icon: 'error', title: 'Connection Blocked', text: 'Google Sheets returned an unreadable response. Check tab sharing.' });
           return;
         }
 
-        const filteredRows = [];
+        const gvizData = JSON.parse(jsonMatch[1]);
+        
+        if (gvizData.status === "error") {
+          Swal.fire({ icon: 'error', title: 'Google Sheet Error', text: gvizData.errors[0].detailed_message });
+          return;
+        }
 
-        gvizData.table.rows.forEach(r => {
-          const rowData = r.c.map((cell, idx) => {
-            if (!cell) return "";
-            if (idx === 0) return formatCellDate(cell.v);
-            return cell.f || cell.v || "";
-          });
+        const allRows = gvizData.table.rows;
+        console.log("Raw sheet rows fetched:", allRows);
 
-          const rawDateStr = rowData[0];
-          const parsedDate = new Date(rawDateStr);
+        if (!allRows || allRows.length === 0) {
+          Swal.fire({ icon: 'warning', title: 'Sheet is Empty', text: 'Connected to the sheet, but no rows were found on this tab (gid).' });
+          return;
+        }
 
-          if (!isNaN(parsedDate.getTime())) {
-            const lessonTime = parsedDate.getTime();
-            if (lessonTime >= today && lessonTime <= twoWeeksLater) {
-              filteredRows.push(rowData);
-            }
-          } else {
-            // Keep row if date parsing cannot be completed cleanly
-            filteredRows.push(rowData);
+        // Search locally in JavaScript across Column N (Index 13)
+        const search = q.toLowerCase();
+        const matchedRows = [];
+
+        allRows.forEach(r => {
+          if (!r.c) return;
+          // Extract plain text values across columns
+          const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
+          
+          // Column N is index 13
+          const teacher = String(rowVals[13] || "").toLowerCase();
+
+          if (teacher.includes(search)) {
+            // Mapping indices: C=2, D=3, E=4, F=5, S=18, T=19, R=17, N=13, M=12, O=14, U=20, G=6, H=7, I=8, J=9, K=10, L=11
+            matchedRows.push([
+              formatCellDate(rowVals[2]),
+              rowVals[3], rowVals[4], rowVals[5],
+              rowVals[18], rowVals[19], rowVals[17],
+              rowVals[13], rowVals[12], rowVals[14], rowVals[20],
+              rowVals[6], rowVals[7], rowVals[8], rowVals[9], rowVals[10], rowVals[11]
+            ]);
           }
         });
 
-        if (filteredRows.length === 0) {
-          Swal.fire({ icon: 'error', title: 'No Lessons Found', text: 'Teacher exists in sheet, but has no lessons in the 14-day window.' });
+        if (matchedRows.length === 0) {
+          Swal.fire({ 
+            icon: 'info', 
+            title: 'Connected successfully!', 
+            text: `Connected to tab ${GID} (${allRows.length} total rows found), but no rows match "${q}" in Column N.` 
+          });
           document.getElementById('results').innerHTML = "";
           return;
         }
-
-        filteredRows.sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
         Swal.close();
-        render(filteredRows);
+        render(matchedRows);
+
       } catch (err) {
-        console.error(err);
-        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data from Google Sheets. Ensure sheet sharing is set to "Anyone with the link".' });
+        console.error("Fetch Error:", err);
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Access Denied / Network Error', 
+          text: 'Make sure your Google Sheet access is set to "Anyone with the link can view".' 
+        });
       }
     }
-
-    function render(rows) {
-      const now = new Date();
-      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student/Group Name", "Password", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
-      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-
-      rows.forEach(r => {
-        const dateParts = String(r[0]).split('/');
-        let dateDisplay = r[0];
-        let lessonEnd = new Date();
-
-        if (dateParts.length === 3) {
-          const day = parseInt(dateParts[2]);
-          const monthIdx = parseInt(dateParts[1]) - 1;
-          const monthName = months[monthIdx] || "";
-          dateDisplay = `${day}/${monthName}`;
-
-          const endHour = r[3] ? parseInt(String(r[3]).split(':')[0]) : 0;
-          const endMin = r[3] ? parseInt(String(r[3]).split(':')[1]) : 0;
-          lessonEnd = new Date(dateParts[0], monthIdx, day, endHour, endMin);
-        }
-
-        const fullTimeStr = `${r[1]} ${r[2]}~${r[3]}`;
-        const isFinished = lessonEnd < now;
-        const rowClass = isFinished ? 'class="finished-row"' : '';
-        const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
-
-        html += `<tr ${rowClass}><td>${badge}</td>`;
-
-        r.forEach((cell, i) => {
-          let content = cell || "-";
-          if (i === 0) content = dateDisplay;
-          const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
-
-          if (String(content).includes('http')) {
-            if (i === 5) { // Material URL
-              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Open</button></td>`;
-            } else if (i === 10) { // FB Form
-              html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
-            } else if (i === 6) { // Meeting URL
-              html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
-            } else { 
-              html += `<td>${content}</td>`; 
-            }
-          } else { 
-            html += `<td ${boldClass}>${content}</td>`; 
-          }
-        });
-        html += '</tr>';
-      });
-      document.getElementById('results').innerHTML = html + '</tbody></table>';
-    }
-  </script>
-</body>
-</html>
