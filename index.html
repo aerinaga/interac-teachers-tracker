@@ -22,6 +22,7 @@
     .header-section h2 { color: var(--primary-blue); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
     .date-note { font-size: 13px; color: #666; margin-bottom: 20px; font-weight: 500; }
     .search-area { display: flex; justify-content: center; gap: 10px; padding-bottom: 10px; }
+    .search-note { font-size: 12px; color: #888; }
     input[type="text"] { padding: 12px 16px; width: 100%; max-width: 450px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
     button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
@@ -44,7 +45,7 @@
       <h2>INTERAC TEACHERS TRACKER</h2>
       <div class="date-note" id="date-range-note">Loading window...</div>
       <div class="search-area">
-        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Clayd)" onkeypress="if(event.key==='Enter') doSearch()">
+        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Meann)" onkeypress="if(event.key==='Enter') doSearch()">
         <button id="btn" onclick="doSearch()">Search</button>
       </div>
       <div class="search-note">Type your Teacher's Name only do not add Teacher in the beginning.</div>
@@ -54,7 +55,7 @@
 
   <script>
     const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
-    const SHEET_NAME = "Lesson Info for Interact";
+    const GID = "174347453"; // Direct GID targeting your active sheet tab
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     window.onload = function() {
@@ -100,10 +101,9 @@
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       const twoWeeksLater = today + (14 * 24 * 60 * 60 * 1000);
 
-      // Select columns mapping to your sheet layout:
-      // C=Date, D=Access, E=Start, F=End, S=MatName, T=MatURL, R=MeetURL, N=Teacher, M=Student, O=Password, U=FBForm, G=Type, H=Area, I=School, J=Grade, K=Class, L=Period
+      // Selects: C=Date, D=Access, E=Start, F=End, S=MatName, T=MatURL, R=MeetURL, N=Teacher, M=Student, O=Password, U=FBForm, G=Type, H=Area, I=School, J=Grade, K=Class, L=Period
       const queryStr = `SELECT C, D, E, F, S, T, R, N, M, O, U, G, H, I, J, K, L WHERE lower(N) contains lower('${q.replace(/'/g, "\\'")}')`;
-      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent(queryStr)}`;
+      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tq=${encodeURIComponent(queryStr)}`;
 
       try {
         const response = await fetch(tqUrl);
@@ -128,7 +128,6 @@
             return cell.f || cell.v || "";
           });
 
-          // Check if date falls in 14-day window
           const rawDateStr = rowData[0];
           const parsedDate = new Date(rawDateStr);
 
@@ -138,25 +137,24 @@
               filteredRows.push(rowData);
             }
           } else {
-            // Fallback: If date parsing fails, keep the row so data isn't hidden
+            // Keep row if date parsing cannot be completed cleanly
             filteredRows.push(rowData);
           }
         });
 
         if (filteredRows.length === 0) {
-          Swal.fire({ icon: 'error', title: 'No Lessons Found', text: 'Teacher exists, but no upcoming lessons in the 14-day window.' });
+          Swal.fire({ icon: 'error', title: 'No Lessons Found', text: 'Teacher exists in sheet, but has no lessons in the 14-day window.' });
           document.getElementById('results').innerHTML = "";
           return;
         }
 
-        // Sort rows by Date ascending
         filteredRows.sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
         Swal.close();
         render(filteredRows);
       } catch (err) {
         console.error(err);
-        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data from Google Sheets.' });
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data from Google Sheets. Ensure sheet sharing is set to "Anyone with the link".' });
       }
     }
 
