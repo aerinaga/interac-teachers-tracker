@@ -124,7 +124,7 @@
           return;
         }
 
-        const search = q.toLowerCase();
+        const search = q.trim().toLowerCase();
         const matchedRows = [];
 
         allRows.forEach(r => {
@@ -132,9 +132,10 @@
           const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
           
           // Column P is index 15 (0-based: A=0... P=15)
-          const teacher = String(rowVals[15] || "").toLowerCase();
+          const teacher = String(rowVals[15] || "").trim().toLowerCase();
 
-          if (teacher.includes(search)) {
+          // Strict exact match comparison: ensures "Anne" won't match inside "Jannessah"
+          if (teacher === search) {
             matchedRows.push([
               formatCellDate(rowVals[2]),  // Date (Col C)
               rowVals[3],                  // Access (Col D)
@@ -161,7 +162,7 @@
           Swal.fire({ 
             icon: 'info', 
             title: 'No Lessons Found', 
-            text: `No lessons found for "${q}" in Column P on tab "${SHEET_TAB_NAME}".` 
+            text: `No exact matches found for "${q}" on tab "${SHEET_TAB_NAME}".` 
           });
           document.getElementById('results').innerHTML = "";
           return;
