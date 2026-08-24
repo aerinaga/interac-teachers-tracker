@@ -25,7 +25,7 @@
     input[type="text"] { padding: 12px 16px; width: 100%; max-width: 450px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
     button { padding: 0 30px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .table-wrapper { flex-grow: 1; overflow: auto; position: relative; }
-    table { width: 100%; border-collapse: collapse; min-width: 1500px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1600px; }
     th { background-color: var(--interac-gold); padding: 12px 10px; font-weight: 800; text-transform: uppercase; color: #000; border-bottom: 2px solid var(--interac-gold-dark); border-right: 1px solid var(--interac-gold-dark); position: sticky; top: 0; z-index: 10; font-size: 11px; letter-spacing: 0.05em; }
     td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid var(--line-color); text-align: center; font-size: 12.5px; }
     .bold-col { font-weight: 700; color: #000; }
@@ -53,9 +53,14 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbycCMs6MbKJfLyzhdSCh0iW7LRoPGIHDyy1uIKXpd17_cGMR80L9huFsTWRj_A3eO1IbA/exec";
-
+    // Direct Google Sheet Config
+    const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    function getCurrentSheetName() {
+      const now = new Date();
+      return `${months[now.getMonth()].toUpperCase()} ${now.getFullYear()}`;
+    }
 
     window.onload = function() {
       const today = new Date();
@@ -76,56 +81,103 @@
       }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
     }
 
+    function formatGoogleDate(val) {
+      if (!val) return "";
+      if (typeof val === 'string' && val.startsWith('Date(')) {
+        const parts = val.match(/\d+/g);
+        if (parts) {
+          const year = parts[0];
+          const month = String(parseInt(parts[1]) + 1).padStart(2, '0');
+          const day = String(parts[2]).padStart(2, '0');
+          return `${year}/${month}/${day}`;
+        }
+      }
+      return val;
+    }
+
     async function doSearch() {
       const q = document.getElementById('q').value.trim();
-      if(!q) return;
+      if (!q) return;
+
       Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+      const sheetName = getCurrentSheetName();
+      // Select columns B through N from sheet
+      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tq=${encodeURIComponent("SELECT B, C, D, E, F, G, H, I, J, K, L, M, N WHERE lower(M) contains lower('" + q.replace(/'/g, "\\'") + "')")}`;
+
       try {
-        const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(q)}`);
-        const data = await response.json();
-        if(!data.rows || data.rows.length === 0) {
+        const response = await fetch(tqUrl);
+        const text = await response.text();
+        
+        // Parse GViz JSON response
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+        if (!jsonMatch) throw new Error("Invalid response");
+        
+        const gvizData = JSON.parse(jsonMatch[1]);
+        if (!gvizData.table || !gvizData.table.rows || gvizData.table.rows.length === 0) {
           Swal.fire({ icon: 'error', title: 'No Lessons Found' });
           document.getElementById('results').innerHTML = "";
           return;
         }
+
+        // Map cells to array format
+        const rows = gvizData.table.rows.map(r => {
+          return r.c.map((cell, idx) => {
+            if (!cell) return "";
+            if (idx === 0) return formatGoogleDate(cell.v); // Format Date B
+            return cell.f || cell.v || "";
+          });
+        });
+
         Swal.close();
-        render(data.rows);
-      } catch (err) { Swal.fire({ icon: 'error', title: 'Connection Error' }); }
+        render(rows);
+      } catch (err) {
+        console.error(err);
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not fetch data directly from Google Sheets.' });
+      }
     }
 
     function render(rows) {
       const now = new Date();
-      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student/Group Name", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
+      // Added "Password" header right after "Student/Group Name"
+      const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student/Group Name", "Password", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
       let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-      
+
       rows.forEach(r => {
         // Transform Date 2026/02/19 -> 19/February
-        const dateParts = r[0].split('/');
-        const day = parseInt(dateParts[2]);
-        const monthName = months[parseInt(dateParts[1]) - 1];
-        const dateDisplay = `${day}/${monthName}`;
+        const dateParts = String(r[0]).split('/');
+        let dateDisplay = r[0];
+        let lessonEnd = new Date();
 
-        // Create Full Time String for Alert
+        if (dateParts.length === 3) {
+          const day = parseInt(dateParts[2]);
+          const monthIdx = parseInt(dateParts[1]) - 1;
+          const monthName = months[monthIdx] || "";
+          dateDisplay = `${day}/${monthName}`;
+
+          const endHour = r[3] ? parseInt(String(r[3]).split(':')[0]) : 0;
+          const endMin = r[3] ? parseInt(String(r[3]).split(':')[1]) : 0;
+          lessonEnd = new Date(dateParts[0], monthIdx, day, endHour, endMin);
+        }
+
         const fullTimeStr = `${r[1]} ${r[2]}~${r[3]}`;
-
-        const lessonEnd = new Date(dateParts[0], parseInt(dateParts[1]) - 1, day, parseInt(r[3].split(':')[0]), parseInt(r[3].split(':')[1]));
         const isFinished = lessonEnd < now;
         const rowClass = isFinished ? 'class="finished-row"' : '';
         const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
 
         html += `<tr ${rowClass}><td>${badge}</td>`;
-        
-          r.forEach((cell, i) => {
+
+        r.forEach((cell, i) => {
           let content = cell || "-";
           if (i === 0) content = dateDisplay;
           const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-          if (content.toString().includes('http')) {
+          if (String(content).includes('http')) {
             if (i === 5) {
               // Material URL -> Closes when finished
               html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[11]}')">Open</button></td>`;
             } else if (i === 9) {
-              // FB Form -> ALWAYS stays active and clickable, even if lesson is finished
+              // FB Form -> ALWAYS stays active and clickable
               html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
             } else if (i === 6) {
               // Meeting URL -> Closes when finished
