@@ -90,14 +90,34 @@
       return val;
     }
 
+    function formatDateForQuery(dateObj) {
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     async function doSearch() {
       const q = document.getElementById('q').value.trim();
       if (!q) return;
 
       Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      // Query columns B through N directly from 'Lesson Info for Interact'
-      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent("SELECT B, C, D, E, F, G, H, I, J, K, L, M, N WHERE lower(M) contains lower('" + q.replace(/'/g, "\\'") + "')")}`;
+      // Calculate Today & 14 days later for SQL Filter
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const future = new Date();
+      future.setDate(today.getDate() + 14);
+      future.setHours(23, 59, 59, 999);
+
+      const startDateStr = formatDateForQuery(today);
+      const endDateStr = formatDateForQuery(future);
+
+      // Query specifically selects columns corresponding to your original Apps Script layout:
+      // C=Date, D=Access, E=Start, F=End, S=MatName, T=MatURL, R=MeetURL, N=Teacher, M=Student, O=Password, U=FBForm, G=Type, H=Area, I=School, J=Grade, K=Class, L=Period
+      const queryStr = `SELECT C, D, E, F, S, T, R, N, M, O, U, G, H, I, J, K, L WHERE lower(N) contains lower('${q.replace(/'/g, "\\'")}') AND C >= date '${startDateStr}' AND C <= date '${endDateStr}' ORDER BY C ASC`;
+
+      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent(queryStr)}`;
 
       try {
         const response = await fetch(tqUrl);
@@ -116,7 +136,7 @@
         const rows = gvizData.table.rows.map(r => {
           return r.c.map((cell, idx) => {
             if (!cell) return "";
-            if (idx === 0) return formatGoogleDate(cell.v);
+            if (idx === 0) return formatGoogleDate(cell.v); // Date C
             return cell.f || cell.v || "";
           });
         });
@@ -163,11 +183,11 @@
           const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
           if (String(content).includes('http')) {
-            if (i === 5) {
-              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[11]}')">Open</button></td>`;
-            } else if (i === 9) {
+            if (i === 5) { // Material URL
+              html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Open</button></td>`;
+            } else if (i === 10) { // FB Form
               html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
-            } else if (i === 6) {
+            } else if (i === 6) { // Meeting URL
               html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
             } else { 
               html += `<td>${content}</td>`; 
