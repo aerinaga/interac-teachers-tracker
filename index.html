@@ -53,14 +53,9 @@
   </div>
 
   <script>
-    // Direct Google Sheet Config
     const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
+    const SHEET_NAME = "Lesson Info for Interact";
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-    function getCurrentSheetName() {
-      const now = new Date();
-      return `${months[now.getMonth()].toUpperCase()} ${now.getFullYear()}`;
-    }
 
     window.onload = function() {
       const today = new Date();
@@ -101,15 +96,13 @@
 
       Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const sheetName = getCurrentSheetName();
-      // Select columns B through N from sheet
-      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tq=${encodeURIComponent("SELECT B, C, D, E, F, G, H, I, J, K, L, M, N WHERE lower(M) contains lower('" + q.replace(/'/g, "\\'") + "')")}`;
+      // Query columns B through N directly from 'Lesson Info for Interact'
+      const tqUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent("SELECT B, C, D, E, F, G, H, I, J, K, L, M, N WHERE lower(M) contains lower('" + q.replace(/'/g, "\\'") + "')")}`;
 
       try {
         const response = await fetch(tqUrl);
         const text = await response.text();
         
-        // Parse GViz JSON response
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
         if (!jsonMatch) throw new Error("Invalid response");
         
@@ -120,11 +113,10 @@
           return;
         }
 
-        // Map cells to array format
         const rows = gvizData.table.rows.map(r => {
           return r.c.map((cell, idx) => {
             if (!cell) return "";
-            if (idx === 0) return formatGoogleDate(cell.v); // Format Date B
+            if (idx === 0) return formatGoogleDate(cell.v);
             return cell.f || cell.v || "";
           });
         });
@@ -139,12 +131,10 @@
 
     function render(rows) {
       const now = new Date();
-      // Added "Password" header right after "Student/Group Name"
       const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student/Group Name", "Password", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
       let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
 
       rows.forEach(r => {
-        // Transform Date 2026/02/19 -> 19/February
         const dateParts = String(r[0]).split('/');
         let dateDisplay = r[0];
         let lessonEnd = new Date();
@@ -174,13 +164,10 @@
 
           if (String(content).includes('http')) {
             if (i === 5) {
-              // Material URL -> Closes when finished
               html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[11]}')">Open</button></td>`;
             } else if (i === 9) {
-              // FB Form -> ALWAYS stays active and clickable
               html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
             } else if (i === 6) {
-              // Meeting URL -> Closes when finished
               html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`;
             } else { 
               html += `<td>${content}</td>`; 
