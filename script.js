@@ -294,19 +294,19 @@ function render(rows) {
 
       if (i === 13) { // TEACHER'S CLOUD LINK
         html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`
+          ? `<td><button class="btn-link" onclick="confirmMeeting('${content.replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">LINK</button></td>`
           : `<td>-</td>`;
-      } else if (i === 15) { // MATERIAL URL (Supports multiple line-separated links)
+      } else if (i === 15) { // MATERIAL URL (Handles multiple links cleanly)
         if (isFinished) {
           html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
         } else if (content) {
-          // Extract all URLs from the cell text
           const urls = content.match(/https?:\/\/[^\s]+/g);
           if (urls && urls.length > 0) {
             let buttonsHtml = '';
             urls.forEach((u, idx) => {
+              const cleanUrl = u.trim().replace(/['"]/g, '');
               const label = `OPEN ${idx + 1}`;
-              buttonsHtml += `<button class="btn-link" style="margin: 2px 0; display: block;" onclick="confirmMaterial('${u}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">${label}</button>`;
+              buttonsHtml += `<button class="btn-link" style="margin: 3px 0; display: block;" onclick="confirmMaterial('${cleanUrl}', '${String(r[14] || 'Material').replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">${label}</button>`;
             });
             html += `<td>${buttonsHtml}</td>`;
           } else {
@@ -317,14 +317,14 @@ function render(rows) {
         }
       } else if (i === 16) { // FEEDBACK LINK
         html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
+          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content.replace(/'/g, "\\'")}', 'Feedback Link')">OPEN</button></td>`
           : `<td>No Feedback</td>`;
       } else if (i === 17) { // URL LINK (Col Q)
         html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'URL Link')">OPEN</button></td>`
+          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content.replace(/'/g, "\\'")}', 'URL Link')">OPEN</button></td>`
           : `<td>-</td>`;
       } else if (content.startsWith('http')) { 
-        html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`;
+        html += `<td><button class="btn-link" onclick="confirmMeeting('${content.replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">LINK</button></td>`;
       } else { 
         html += `<td ${boldClass}>${content || "-"}</td>`; 
       }
