@@ -9,6 +9,7 @@ window.onload = function() {
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
 };
 
+// Confirmation modal for materials
 function confirmMaterial(url, materialName, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -45,6 +46,7 @@ function confirmMaterial(url, materialName, timeStr, studentName, area) {
   });
 }
 
+// Confirmation modal for meeting links (Zoom/Teams/Portals)
 function confirmMeeting(url, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -81,6 +83,7 @@ function confirmMeeting(url, timeStr, studentName, area) {
   });
 }
 
+// Generic link confirmation for generic or raw links
 function confirmGenericLink(url, label) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -116,6 +119,7 @@ function confirmGenericLink(url, label) {
   });
 }
 
+// Helper to parse date text like "07/September(Mon)" into a JavaScript Date object
 function parseSheetDate(rawDateStr) {
   if (!rawDateStr) return null;
   const match = String(rawDateStr).match(/^(\d{1,2})\/([A-Za-z]+)/);
@@ -131,7 +135,7 @@ function parseSheetDate(rawDateStr) {
   return null;
 }
 
-// Fetch cell B1 directly from CSV endpoint
+// Fetch cell B1 directly from CSV endpoint to safely retrieve merged B1:F1 link
 async function fetchCellB1Url() {
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:csv&range=B1:F1`;
   try {
@@ -203,7 +207,7 @@ async function doSearch() {
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
           const studentGroup = String(rowVals[9] || "").trim();
           
-          // Exception: If Student Name / Meeting Group contains "jp back up", clear cloudLink for this row
+          // Exception: If Student Name / Meeting Group contains "jp back up", suppress cloud link
           const isJpBackup = studentGroup.toLowerCase().includes("jp back up");
           const finalCloudLink = isJpBackup ? "-" : cloudLink;
 
