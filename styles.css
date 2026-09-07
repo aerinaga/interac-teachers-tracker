@@ -1,75 +1,92 @@
+/* Import Inter (Apple San Francisco lookalike) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 /* Base Layout & iOS Native Typography */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
-  color: #1c1c1e; /* Darker, crisp iOS text color */
-  font-weight: 500; /* Thicker base weight (Medium) */
+  text-rendering: optimizeLegibility;
+  background-color: #f2f2f7; /* Classic iOS Light Gray Background */
+  color: #1c1c1e;
+  font-weight: 500;
   margin: 0;
-  padding: 20px 10px;
+  padding: 24px 12px;
 }
 
-/* Header & Search Section */
+/* Header & Search Card (iOS Inset Card Style) */
 .search-container {
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto 15px auto;
+  max-width: 650px;
+  margin: 0 auto 20px auto;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 14px; /* iOS Smooth Rounded Corners */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .search-container h2 {
   color: #007aff; /* iOS System Blue */
-  font-size: 26px;
-  font-weight: 800; /* Extra bold title */
-  letter-spacing: -0.5px; /* iOS style tight tracking */
-  margin: 0 0 6px 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin: 0 0 8px 0;
   text-transform: uppercase;
 }
 
 #date-range-note {
-  font-size: 14px;
-  font-weight: 600; /* Semi-bold note */
+  font-size: 13.5px;
+  font-weight: 600;
   color: #3a3a3c;
   margin-bottom: 20px;
 }
 
-/* Search Box & Button */
+/* Search Input & Button */
 .search-box {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .search-box input[type="text"] {
   width: 280px;
   padding: 10px 14px;
-  border: 1px solid #c7c7cc; /* iOS border gray */
-  border-radius: 8px; /* Slightly smoother iOS corner radius */
+  border: 1px solid #c7c7cc;
+  border-radius: 10px;
   font-size: 15px;
   font-weight: 500;
   outline: none;
+  background-color: #f9f9fb;
+  transition: all 0.2s ease;
+}
+
+.search-box input[type="text"]:focus {
+  border-color: #007aff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
 }
 
 .search-box button {
-  padding: 10px 24px;
-  background-color: #007aff; /* iOS System Blue */
+  padding: 10px 22px;
+  background-color: #007aff;
   color: #ffffff;
-  font-weight: 700; /* Bold button text */
+  font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  transition: opacity 0.15s ease;
 }
 
 .search-box button:hover {
-  background-color: #0062cc;
+  opacity: 0.9;
 }
 
 .search-container small {
   display: block;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   color: #8e8e93;
   margin-top: 8px;
@@ -80,6 +97,9 @@ body {
   width: 100%;
   overflow-x: auto;
   margin-top: 15px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Table Base Styling */
@@ -88,46 +108,45 @@ table {
   border-collapse: collapse;
   white-space: nowrap;
   font-size: 13px;
-  font-weight: 500; /* Thicker table cell text */
 }
 
-/* Golden Yellow Table Headers */
+/* Golden Yellow Headers */
 th {
   background-color: #f1c232;
   color: #000000;
-  font-weight: 800; /* Extra bold headers */
-  font-size: 12px;
+  font-weight: 800;
+  font-size: 11.5px;
   text-transform: uppercase;
   padding: 12px 10px;
-  border: 1px solid #d9a712;
+  border-bottom: 2px solid #d9a712;
   text-align: center;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
 /* Table Cells */
 td {
-  padding: 10px 12px;
+  padding: 11px 12px;
   text-align: center;
   border-bottom: 1px solid #e5e5ea;
   border-right: 1px solid #f2f2f7;
   color: #1c1c1e;
-  font-weight: 600; /* Medium-bold for overall readability */
+  font-weight: 600;
 }
 
 tr:hover {
   background-color: #f2f2f7;
 }
 
-/* Bold Columns (Date & Times) */
+/* Date and Time Columns */
 .bold-col {
-  font-weight: 800; /* Extra bold date and time */
+  font-weight: 700;
 }
 
-/* Pill Badges (STATUS) */
+/* STATUS Badges */
 .badge {
   padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
+  border-radius: 20px;
+  font-size: 10.5px;
   font-weight: 800;
   display: inline-block;
   letter-spacing: 0.3px;
@@ -135,7 +154,7 @@ tr:hover {
 
 .badge-upcoming {
   background-color: #e4f9e8;
-  color: #248a3d; /* iOS System Green */
+  color: #248a3d;
   border: 1px solid #34c759;
 }
 
@@ -145,28 +164,28 @@ tr:hover {
   border: 1px solid #c7c7cc;
 }
 
-/* Finished Row Dimming */
 .finished-row {
   opacity: 0.55;
 }
 
-/* Action Buttons ("OPEN") */
+/* Action Buttons */
 .btn-link {
   display: inline-block;
-  padding: 5px 16px;
+  padding: 6px 16px;
   background-color: #007aff;
   color: #ffffff !important;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
   font-weight: 700;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11.5px;
   text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .btn-link:hover {
-  background-color: #0062cc;
+  opacity: 0.9;
 }
 
 .btn-disabled {
@@ -175,7 +194,6 @@ tr:hover {
   cursor: not-allowed;
 }
 
-/* Text Link ("Link") */
 .raw-link {
   color: #007aff;
   font-weight: 700;
