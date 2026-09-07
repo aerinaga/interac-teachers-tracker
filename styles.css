@@ -6,7 +6,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0f2f5; /* Subtle cool-gray tint to pop white glass panels */
+  background-color: #e5e8eb; /* Slightly deeper gray body background */
   color: #1c1c1e;
   font-weight: 500;
   margin: 0;
@@ -21,32 +21,29 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 75vw;          /* Prominent screen width presence */
-  max-width: 900px;     /* Cap width for high-res desktop screens */
+  width: 75vw;
+  max-width: 900px;
   height: auto;
-  opacity: 0.95;        /* Vibrant color rendering */
-  z-index: 0;           /* Sits strictly behind content */
-  pointer-events: none; /* Mouse clicks pass through directly */
+  opacity: 0.95;
+  z-index: 0;
+  pointer-events: none;
   object-fit: contain;
 }
 
-/* Frosted Glass Header & Search Container */
+/* Header & Search Container (Completely Seamless / No White Box) */
 .search-container {
   position: relative;
   z-index: 1;
   text-align: center;
   max-width: 650px;
   margin: 0 auto 15px auto;
-  
-  /* Glassmorphism Effect */
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  
-  padding: 18px 24px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  background: transparent; /* Card outline removed */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 10px;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .search-container h2 {
@@ -81,7 +78,8 @@ body {
   border-radius: 8px;
   font-size: 13px;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .search-box button {
@@ -93,6 +91,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .search-container small {
@@ -102,21 +101,21 @@ body {
   margin-top: 6px;
 }
 
-/* Frosted Glass Results Table Card */
+/* Darker Glass Results Table Card */
 #results {
   position: relative;
   z-index: 1;
   width: 100%;
   margin-top: 10px;
   
-  /* Translucent Glass Table Base */
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Tinted Dark-Gray Glassmorphism Effect */
+  background: rgba(210, 215, 222, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden;
 }
 
@@ -132,7 +131,7 @@ table {
 
 /* Golden Yellow Table Headers */
 th {
-  background-color: rgba(241, 194, 50, 0.92);
+  background-color: rgba(241, 194, 50, 0.95);
   color: #000000;
   font-weight: 800;
   font-size: 10px;
@@ -147,15 +146,15 @@ th {
 td {
   padding: 6px 4px;
   text-align: center;
-  border-bottom: 1px solid rgba(229, 229, 234, 0.7);
-  border-right: 1px solid rgba(242, 242, 247, 0.7);
+  border-bottom: 1px solid rgba(200, 205, 212, 0.6);
+  border-right: 1px solid rgba(200, 205, 212, 0.4);
   color: #1c1c1e;
   font-weight: 600;
   line-height: 1.2;
 }
 
 tr:hover {
-  background-color: rgba(0, 122, 255, 0.08);
+  background-color: rgba(0, 122, 255, 0.1);
 }
 
 .bold-col {
@@ -184,7 +183,7 @@ tr:hover {
 }
 
 .finished-row {
-  opacity: 0.65;
+  opacity: 0.7;
 }
 
 /* Action Buttons */
