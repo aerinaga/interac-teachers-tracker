@@ -168,7 +168,7 @@ async function doSearch() {
       return;
     }
 
-    // Retrieve Teacher Cloud Link from cell B1 (Row index 0, Col B)
+    // Retrieve Teacher Login URL from Cell B1 (Row index 0, Col B)
     let cloudLink = "";
     if (allRows[0] && allRows[0].c && allRows[0].c[1]) {
       cloudLink = allRows[0].c[1].v || allRows[0].c[1].f || "";
@@ -198,23 +198,23 @@ async function doSearch() {
         // Filter: Only include row if date is valid AND falls within the 2-week range
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
           matchedRows.push([
-            rowVals[0],  // DATE (Col A)
-            rowVals[1],  // ACCESS (Col B)
-            rowVals[2],  // START (Col C)
-            rowVals[3],  // END (Col D)
-            rowVals[4],  // LESSON TYPE (Col E)
-            rowVals[5],  // Area (BoE) (Col F)
-            rowVals[6],  // SCHOOL (Col G)
-            rowVals[7],  // GRADE (Col H)
-            rowVals[8],  // CLASS (Col I)
-            rowVals[9],  // STUDENT'S NAME / MEETING GROUP (Col J)
-            rowVals[10], // USER ID (Col K)
-            rowVals[11], // PASSWORD (Col L)
-            rowVals[12], // TEACHER'S NAME (Col M)
-            cloudLink,   // TEACHER'S CLOUD LINK (Pulled from Cell B1)
-            rowVals[13], // MATERIAL (Col N)
-            rowVals[14], // MATERIAL URL (Col O)
-            rowVals[15]  // FEEDBACK LINK (Col P)
+            rowVals[0],  // DATE (Col A) -> Index 0
+            rowVals[1],  // ACCESS (Col B) -> Index 1
+            rowVals[2],  // START (Col C) -> Index 2
+            rowVals[3],  // END (Col D) -> Index 3
+            rowVals[4],  // LESSON TYPE (Col E) -> Index 4
+            rowVals[5],  // Area (BoE) (Col F) -> Index 5
+            rowVals[6],  // SCHOOL (Col G) -> Index 6
+            rowVals[7],  // GRADE (Col H) -> Index 7
+            rowVals[8],  // CLASS (Col I) -> Index 8
+            rowVals[9],  // STUDENT'S NAME / MEETING GROUP (Col J) -> Index 9
+            rowVals[10], // USER ID (Col K) -> Index 10
+            rowVals[11], // PASSWORD (Col L) -> Index 11
+            rowVals[12], // TEACHER'S NAME (Col M) -> Index 12
+            cloudLink,   // TEACHER'S CLOUD LINK (From Cell B1) -> Index 13
+            rowVals[13], // MATERIAL (Col N) -> Index 14
+            rowVals[14], // MATERIAL URL (Col O) -> Index 15
+            rowVals[15]  // FEEDBACK LINK (Col P) -> Index 16
           ]);
         }
       }
@@ -246,7 +246,7 @@ async function doSearch() {
 function render(rows) {
   const now = new Date();
   
-  // Exact 18 Headers in sequence
+  // 18 Headers aligned to match indexed data
   const headers = [
     "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
     "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
@@ -275,24 +275,27 @@ function render(rows) {
     // 1. Render STATUS badge first
     html += `<tr ${rowClass}><td>${badge}</td>`;
 
-    // 2. Render remaining 17 data cells
+    // 2. Render remaining data cells matching strict header indices
     r.forEach((cell, i) => {
       let content = String(cell || "-").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-      if (content.includes('http')) {
-        if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 in data array)
-          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`;
-        } else if (i === 15) { // MATERIAL URL (Index 15 in data array)
-          html += isFinished 
-            ? `<td><span class="btn-link btn-disabled">CLOSED</span></td>` 
-            : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`;
-        } else if (i === 16) { // FEEDBACK LINK (Index 16 in data array)
-          html += `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`;
-        } else { 
-          // Uses blue button style (btn-link) with LINK label
-          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`; 
-        }
+      if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 - Pulled from Cell B1)
+        html += content.startsWith('http')
+          ? `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`
+          : `<td>-</td>`;
+      } else if (i === 15) { // MATERIAL URL (Index 15)
+        html += isFinished 
+          ? `<td><span class="btn-link btn-disabled">CLOSED</span></td>` 
+          : content.startsWith('http')
+            ? `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`
+            : `<td>-</td>`;
+      } else if (i === 16) { // FEEDBACK LINK (Index 16)
+        html += content.startsWith('http')
+          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
+          : `<td>No Feedback</td>`;
+      } else if (content.startsWith('http')) { // Catch-all for any other raw URLs
+        html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`;
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
       }
