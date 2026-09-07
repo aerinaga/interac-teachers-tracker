@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INTERAC TEACHER TRACKER</title>
+  <title>Lesson Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <div class="header-section">
-      <h2>INTERAC TEACHERS TRACKER</h2>
-      <div class="date-note" id="date-range-note">Loading window...</div>
-      <div class="search-area">
-        <input type="text" id="q" placeholder="Enter Teacher Name (Ex. Clayd)" onkeypress="if(event.key==='Enter') doSearch()">
-        <button id="btn" onclick="doSearch()">Search</button>
-      </div>
-      <div class="search-note">Type your Teacher's Name only do not add Teacher in the beginning.</div>
+
+  <div class="search-container">
+    <h2>Teacher Lesson Search</h2>
+    <p id="date-range-note"></p>
+    
+    <div class="search-box">
+      <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)">
+      <button onclick="doSearch()">Search</button>
     </div>
-    <div id="results-container" class="table-wrapper"><div id="results"></div></div>
   </div>
+
+  <!-- Results Table Container -->
+  <div id="results"></div>
 
   <script src="script.js"></script>
 </body>
