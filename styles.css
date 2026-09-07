@@ -7,7 +7,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #e5e8eb;
-  color: #000000; /* Pitch black for maximum contrast */
+  color: #000000;
   font-weight: 600;
   margin: 0;
   padding: 16px;
@@ -35,14 +35,15 @@ body {
   position: relative;
   z-index: 1;
   text-align: center;
-  max-width: 650px;
-  margin: 0 auto 15px auto;
+  width: 100%;
+  max-width: 100%; /* Expand to span header width */
+  margin: 0 auto 10px auto;
   background: transparent;
-  padding: 10px;
+  padding: 10px 0;
 }
 
 .search-container h2 {
-  color: #0056b3; /* Darker blue header text */
+  color: #0056b3;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.3px;
@@ -53,7 +54,7 @@ body {
 #date-range-note {
   font-size: 13px;
   font-weight: 700;
-  color: #1c1c1e; /* Darker note text */
+  color: #1c1c1e;
   margin-bottom: 12px;
 }
 
@@ -95,8 +96,18 @@ body {
   display: block;
   font-size: 11px;
   font-weight: 700;
-  color: #3a3a3c; /* Darker subtext */
+  color: #3a3a3c;
   margin-top: 6px;
+}
+
+/* Upper Right Note (Placed where red box was located) */
+.backup-note {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d70015; /* Red highlight to draw attention */
+  margin-top: 10px;
+  padding-right: 8px;
 }
 
 /* Darker Glass Results Table Card */
@@ -104,7 +115,7 @@ body {
   position: relative;
   z-index: 1;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 5px;
   
   /* Tinted Dark-Gray Glassmorphism Effect */
   background: rgba(200, 205, 212, 0.7);
@@ -146,7 +157,7 @@ td {
   text-align: center;
   border-bottom: 1px solid rgba(180, 185, 192, 0.7);
   border-right: 1px solid rgba(180, 185, 192, 0.5);
-  color: #000000; /* Darkened cell text */
+  color: #000000;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -161,7 +172,7 @@ tr:hover {
 
 /* Gray Tint for Entire Finished Rows */
 .finished-row {
-  background-color: rgba(140, 145, 155, 0.35); /* Noticeable gray fill */
+  background-color: rgba(140, 145, 155, 0.35);
   color: #2c2c2e;
 }
 
@@ -183,8 +194,8 @@ tr:hover {
 /* Red Finished Badge */
 .badge-finished {
   background-color: #ffe5e5;
-  color: #d70015; /* Sharp red text */
-  border: 1px solid #ff3b30; /* Bright red outline */
+  color: #d70015;
+  border: 1px solid #ff3b30;
 }
 
 /* Action Buttons */
