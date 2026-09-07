@@ -135,6 +135,20 @@ function parseSheetDate(rawDateStr) {
   return null;
 }
 
+// Extract clean HTTP string across merged cells or text properties
+function parseUrlFromMergedCell(cell) {
+  if (!cell) return "";
+  const strV = String(cell.v || "").trim();
+  const strF = String(cell.f || "").trim();
+
+  if (strV.startsWith("http")) return strV;
+  if (strF.startsWith("http")) return strF;
+
+  // Regex extract if wrapped in HYPERLINK(...) or rich text format
+  const match = (strV + " " + strF).match(/https?:\/\/[^\s"',<)]+/i);
+  return match ? match[0] : "";
+}
+
 async function doSearch() {
   const q = document.getElementById('q').value.trim();
   if (!q) return;
@@ -168,10 +182,16 @@ async function doSearch() {
       return;
     }
 
-    // Retrieve Teacher Login URL from Cell B1 (Row index 0, Col B)
+    // Scrape Row 0 across Columns B through F to reliably grab the URL from merged cell B1:F1
     let cloudLink = "";
-    if (allRows[0] && allRows[0].c && allRows[0].c[1]) {
-      cloudLink = allRows[0].c[1].v || allRows[0].c[1].f || "";
+    if (allRows[0] && allRows[0].c) {
+      for (let colIdx = 1; colIdx <= 5; colIdx++) {
+        const foundUrl = parseUrlFromMergedCell(allRows[0].c[colIdx]);
+        if (foundUrl) {
+          cloudLink = foundUrl;
+          break;
+        }
+      }
     }
 
     const search = q.trim().toLowerCase();
@@ -187,6 +207,8 @@ async function doSearch() {
 
     allRows.forEach(r => {
       if (!r.c) return;
+
+      // Extract raw cell values or formatted strings
       const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
       
       // Column M is index 12 (Teacher's name)
@@ -211,7 +233,7 @@ async function doSearch() {
             rowVals[10], // USER ID (Col K) -> Index 10
             rowVals[11], // PASSWORD (Col L) -> Index 11
             rowVals[12], // TEACHER'S NAME (Col M) -> Index 12
-            cloudLink,   // TEACHER'S CLOUD LINK (From Cell B1) -> Index 13
+            cloudLink,   // TEACHER'S CLOUD LINK (Pulled from Merged B1:F1) -> Index 13
             rowVals[13], // MATERIAL (Col N) -> Index 14
             rowVals[14], // MATERIAL URL (Col O) -> Index 15
             rowVals[15]  // FEEDBACK LINK (Col P) -> Index 16
@@ -246,7 +268,7 @@ async function doSearch() {
 function render(rows) {
   const now = new Date();
   
-  // 18 Headers aligned to match indexed data
+  // 18 Headers aligned with indexed row data
   const headers = [
     "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
     "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
@@ -280,7 +302,7 @@ function render(rows) {
       let content = String(cell || "-").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-      if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 - Pulled from Cell B1)
+      if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 - Extracted from merged B1:F1)
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`
           : `<td>-</td>`;
@@ -294,7 +316,7 @@ function render(rows) {
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
           : `<td>No Feedback</td>`;
-      } else if (content.startsWith('http')) { // Catch-all for any other raw URLs
+      } else if (content.startsWith('http')) { 
         html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`;
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
