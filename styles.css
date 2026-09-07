@@ -100,14 +100,35 @@ body {
   margin-top: 6px;
 }
 
-/* Upper Right Note */
+/* Upper Right Note Container */
+.backup-note-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+  padding-right: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Upper Right Note Text */
 .backup-note {
   text-align: right;
   font-size: 12px;
   font-weight: 700;
   color: #d70015;
-  margin-top: 10px;
-  padding-right: 8px;
+  margin-top: 0;
+  padding-right: 0;
+}
+
+/* Character Pointer Image */
+.backup-pointer-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  /* Flips character horizontally so finger points left at the text */
+  transform: scaleX(-1); 
 }
 
 /* Darker Glass Results Table Card */
