@@ -6,9 +6,9 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #e5e8eb; /* Slightly deeper gray body background */
-  color: #1c1c1e;
-  font-weight: 500;
+  background-color: #e5e8eb;
+  color: #000000; /* Pitch black for maximum contrast */
+  font-weight: 600;
   margin: 0;
   padding: 16px;
   position: relative;
@@ -30,24 +30,19 @@ body {
   object-fit: contain;
 }
 
-/* Header & Search Container (Completely Seamless / No White Box) */
+/* Header & Search Container */
 .search-container {
   position: relative;
   z-index: 1;
   text-align: center;
   max-width: 650px;
   margin: 0 auto 15px auto;
-  background: transparent; /* Card outline removed */
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: transparent;
   padding: 10px;
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
 }
 
 .search-container h2 {
-  color: #007aff;
+  color: #0056b3; /* Darker blue header text */
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.3px;
@@ -57,8 +52,8 @@ body {
 
 #date-range-note {
   font-size: 13px;
-  font-weight: 600;
-  color: #3a3a3c;
+  font-weight: 700;
+  color: #1c1c1e; /* Darker note text */
   margin-bottom: 12px;
 }
 
@@ -74,9 +69,11 @@ body {
 .search-box input[type="text"] {
   width: 240px;
   padding: 8px 12px;
-  border: 1px solid #c7c7cc;
+  border: 1px solid #8e8e93;
   border-radius: 8px;
   font-size: 13px;
+  font-weight: 700;
+  color: #000000;
   outline: none;
   background-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -86,7 +83,7 @@ body {
   padding: 8px 18px;
   background-color: #007aff;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 800;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -97,7 +94,8 @@ body {
 .search-container small {
   display: block;
   font-size: 11px;
-  color: #636366;
+  font-weight: 700;
+  color: #3a3a3c; /* Darker subtext */
   margin-top: 6px;
 }
 
@@ -109,7 +107,7 @@ body {
   margin-top: 10px;
   
   /* Tinted Dark-Gray Glassmorphism Effect */
-  background: rgba(210, 215, 222, 0.65);
+  background: rgba(200, 205, 212, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   
@@ -119,7 +117,7 @@ body {
   overflow: hidden;
 }
 
-/* Table Layout (Fit to Screen Width) */
+/* Table Layout */
 table {
   width: 100%;
   table-layout: fixed;
@@ -131,7 +129,7 @@ table {
 
 /* Golden Yellow Table Headers */
 th {
-  background-color: rgba(241, 194, 50, 0.95);
+  background-color: rgba(241, 194, 50, 0.98);
   color: #000000;
   font-weight: 800;
   font-size: 10px;
@@ -142,28 +140,34 @@ th {
   line-height: 1.1;
 }
 
-/* Table Cells */
+/* Table Cells with Darker Text */
 td {
   padding: 6px 4px;
   text-align: center;
-  border-bottom: 1px solid rgba(200, 205, 212, 0.6);
-  border-right: 1px solid rgba(200, 205, 212, 0.4);
-  color: #1c1c1e;
-  font-weight: 600;
+  border-bottom: 1px solid rgba(180, 185, 192, 0.7);
+  border-right: 1px solid rgba(180, 185, 192, 0.5);
+  color: #000000; /* Darkened cell text */
+  font-weight: 700;
   line-height: 1.2;
 }
 
 tr:hover {
-  background-color: rgba(0, 122, 255, 0.1);
+  background-color: rgba(0, 122, 255, 0.15);
 }
 
 .bold-col {
-  font-weight: 700;
+  font-weight: 800;
+}
+
+/* Gray Tint for Entire Finished Rows */
+.finished-row {
+  background-color: rgba(140, 145, 155, 0.35); /* Noticeable gray fill */
+  color: #2c2c2e;
 }
 
 /* Status Badges */
 .badge {
-  padding: 2px 5px;
+  padding: 3px 6px;
   border-radius: 10px;
   font-size: 9px;
   font-weight: 800;
@@ -172,18 +176,15 @@ tr:hover {
 
 .badge-upcoming {
   background-color: #e4f9e8;
-  color: #248a3d;
+  color: #1b632b;
   border: 1px solid #34c759;
 }
 
+/* Red Finished Badge */
 .badge-finished {
-  background-color: rgba(242, 242, 247, 0.8);
-  color: #8e8e93;
-  border: 1px solid #c7c7cc;
-}
-
-.finished-row {
-  opacity: 0.7;
+  background-color: #ffe5e5;
+  color: #d70015; /* Sharp red text */
+  border: 1px solid #ff3b30; /* Bright red outline */
 }
 
 /* Action Buttons */
@@ -195,24 +196,25 @@ tr:hover {
   text-decoration: none;
   border-radius: 5px;
   border: none;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   font-size: 10px;
   text-transform: uppercase;
 }
 
 .btn-disabled {
-  background-color: rgba(229, 229, 234, 0.8);
-  color: #8e8e93 !important;
+  background-color: rgba(180, 180, 185, 0.6);
+  color: #48484a !important;
   cursor: not-allowed;
   padding: 3px 8px;
   border-radius: 5px;
   font-size: 10px;
+  font-weight: 700;
 }
 
 .raw-link {
-  color: #007aff;
-  font-weight: 700;
+  color: #0056b3;
+  font-weight: 800;
   text-decoration: underline;
   cursor: pointer;
   font-size: 11px;
