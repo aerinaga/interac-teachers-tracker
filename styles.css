@@ -13,6 +13,13 @@ body {
   padding: 16px;
   position: relative;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page wrapper to push footer down correctly */
+.page-wrapper {
+  flex: 1;
 }
 
 /* Background Logo */
@@ -153,13 +160,13 @@ body {
   overflow: hidden;
 }
 
-/* Minimalist Copyright Footer Styles */
+/* Minimalist Copyright Footer Styles (Safely at the bottom, no white divider line) */
 .site-footer {
   position: relative;
   z-index: 1;
   text-align: center;
-  margin-top: 25px;
-  padding-bottom: 10px;
+  margin-top: 30px;
+  padding: 10px 0;
 }
 
 .site-footer p {
