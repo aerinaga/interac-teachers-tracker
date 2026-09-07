@@ -100,12 +100,12 @@ body {
   margin-top: 6px;
 }
 
-/* Backup Notice Section - Perfectly Aligned */
+/* Backup Notice Section */
 .backup-note-container {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0; /* Zero gap so finger touches text directly */
+  gap: 0;
   margin-top: 5px;
   padding-right: 16px;
   position: relative;
@@ -114,21 +114,24 @@ body {
 
 .backup-note {
   text-align: right;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: #d70015;
   margin: 0;
-  white-space: nowrap; /* Prevents text from wrapping */
+  white-space: nowrap;
 }
 
+/* Large Character Image - Shifted Up and Aligned to Word */
 .backup-pointer-img {
-  height: 140px; /* Natural proportions without crop clipping */
-  width: auto;
-  object-fit: contain;
-  transform: scaleX(-1); /* Flips image so hand points left */
-  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.15));
-  margin-left: -10px; /* Pulls finger directly over the end of the text */
-  margin-top: 15px;   /* Vertically aligns pointing finger with red text line */
+  height: 220px;            
+  width: auto;             
+  object-fit: contain;     
+  transform: scaleX(-1);   
+  filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.2));
+  margin-left: -70px;      /* Pulls her finger further left into the text */
+  margin-top: -20px;       /* Shifts her higher up relative to the text line */
+  margin-right: -20px;     
+  pointer-events: none;
 }
 
 /* Results Table Card */
