@@ -1,177 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Interac Lesson Tracker</title>
-
-  <!-- SweetAlert2 CSS & JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson Tracker</title>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f2f2f7;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1px solid #c7c7cc;
-      border-radius: 10px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    button.btn-search {
-      padding: 12px 24px;
-      background-color: #007aff;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    #date-range-note {
-      font-size: 13px;
-      color: #6e6e73;
-      margin-bottom: 20px;
-    }
-
-    /* JP Backup Notice Banner */
-    .jp-notice-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 15px 0 20px 0;
-    }
-
-    .jp-notice-text {
-      color: #d93025;
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .jp-notice-img {
-      height: 65px;
-      width: auto;
-      object-fit: contain;
-      transform: scaleX(-1); /* Flips image horizontally to point towards text */
-    }
-
-    /* Table Styles */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 13px;
-    }
-
-    th {
-      background-color: #fbbc04;
-      color: #000000;
-      padding: 12px 8px;
-      text-align: left;
-      font-weight: 700;
-      border: 1px solid #e5e5ea;
-    }
-
-    td {
-      padding: 10px 8px;
-      border: 1px solid #e5e5ea;
-      color: #1c1c1e;
-    }
-
-    .bold-col {
-      font-weight: 700;
-    }
-
-    .finished-row {
-      background-color: #f2f2f7;
-      color: #8e8e93;
-    }
-
-    /* Buttons & Badges */
-    .btn-link {
-      background-color: #007aff;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .btn-disabled {
-      background-color: #e5e5ea;
-      color: #8e8e93;
-      cursor: not-allowed;
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 700;
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      display: inline-block;
-    }
-
-    .badge-upcoming {
-      background-color: #34c759;
-      color: white;
-    }
-
-    .badge-finished {
-      background-color: #8e8e93;
-      color: white;
-    }
-  </style>
 </head>
 <body>
 
-  <div class="container">
+  <!-- Background Watermark Logo -->
+  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
+
+  <div class="search-container">
+    <h2>INTERAC LESSON TEACHERS TRACKER</h2>
+    <p id="date-range-note"></p>
+    
     <div class="search-box">
-      <input type="text" id="q" placeholder="Enter Teacher's Name..." onkeydown="if(event.key === 'Enter') doSearch()" />
-      <button class="btn-search" onclick="doSearch()">Search</button>
+      <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)">
+      <button onclick="doSearch()">Search</button>
     </div>
+    <small>Type your Teacher's Name only (e.g., enter "Clayd", not "Teacher Clayd").</small>
 
-    <div id="date-range-note"></div>
-
-    <!-- JP Backup Notice Section -->
-    <div class="jp-notice-container">
-      <span class="jp-notice-text">*If you are a JP Back up, the back up link is in USER ID section.</span>
-      <img src="TEASER (40).png" alt="Pointer" class="jp-notice-img" />
+    <!-- Right-aligned Backup Notice -->
+    <div class="backup-note">
+      *If you are a JP Back up, the back up link is in <strong>USER ID</strong> section.
     </div>
-
-    <div id="results"></div>
   </div>
 
+  <!-- Results Table Container -->
+  <div id="results"></div>
+
+  <!-- Custom JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
