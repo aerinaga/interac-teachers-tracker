@@ -21,14 +21,17 @@
     <p id="date-range-note"></p>
     
     <div class="search-box">
-      <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)">
+      <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)" onkeydown="if(event.key === 'Enter') doSearch()">
       <button onclick="doSearch()">Search</button>
     </div>
     <small>Type your Teacher's Name only (e.g., enter "Clayd", not "Teacher Clayd").</small>
 
-    <!-- Right-aligned Backup Notice -->
-    <div class="backup-note">
-      *If you are a JP Back up, the back up link is in <strong>USER ID</strong> section.
+    <!-- Right-aligned Backup Notice with Character Image -->
+    <div class="backup-note-container">
+      <div class="backup-note">
+        *If you are a JP Back up, the back up link is in <strong>USER ID</strong> section.
+      </div>
+      <img src="TEASER (40).png" alt="Pointer" class="backup-pointer-img">
     </div>
   </div>
 
