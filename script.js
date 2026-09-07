@@ -204,8 +204,16 @@ async function doSearch() {
 
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
           const studentGroup = String(rowVals[9] || "").trim();
+          const userId = String(rowVals[10] || "").trim();
+          const password = String(rowVals[11] || "").trim();
+          
           const isJpBackup = studentGroup.toLowerCase().includes("jp back up");
-          const finalCloudLink = isJpBackup ? "-" : cloudLink;
+          
+          // Validation: If no USER ID or Password, or if it's a JP Backup row, suppress cloud link
+          let finalCloudLink = cloudLink;
+          if (isJpBackup || !userId || !password) {
+            finalCloudLink = "-";
+          }
 
           matchedRows.push([
             rowVals[0],     // 0: DATE
@@ -299,7 +307,7 @@ function render(rows) {
         } else {
           html += `<td>-</td>`;
         }
-      } else if (i === 15) { // MATERIAL URL (Handles multiple links safely via element binding)
+      } else if (i === 15) { // MATERIAL URL
         if (isFinished) {
           html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
         } else if (content) {
