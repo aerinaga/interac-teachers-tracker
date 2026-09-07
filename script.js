@@ -289,19 +289,32 @@ function render(rows) {
     html += `<tr ${rowClass}><td>${badge}</td>`;
 
     r.forEach((cell, i) => {
-      let content = String(cell || "-").trim();
+      let content = String(cell || "").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
       if (i === 13) { // TEACHER'S CLOUD LINK
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`
           : `<td>-</td>`;
-      } else if (i === 15) { // MATERIAL URL
-        html += isFinished 
-          ? `<td><span class="btn-link btn-disabled">CLOSED</span></td>` 
-          : content.startsWith('http')
-            ? `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`
-            : `<td>-</td>`;
+      } else if (i === 15) { // MATERIAL URL (Supports multiple line-separated links)
+        if (isFinished) {
+          html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
+        } else if (content) {
+          // Extract all URLs from the cell text
+          const urls = content.match(/https?:\/\/[^\s]+/g);
+          if (urls && urls.length > 0) {
+            let buttonsHtml = '';
+            urls.forEach((u, idx) => {
+              const label = `OPEN ${idx + 1}`;
+              buttonsHtml += `<button class="btn-link" style="margin: 2px 0; display: block;" onclick="confirmMaterial('${u}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">${label}</button>`;
+            });
+            html += `<td>${buttonsHtml}</td>`;
+          } else {
+            html += `<td>-</td>`;
+          }
+        } else {
+          html += `<td>-</td>`;
+        }
       } else if (i === 16) { // FEEDBACK LINK
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
@@ -313,7 +326,7 @@ function render(rows) {
       } else if (content.startsWith('http')) { 
         html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`;
       } else { 
-        html += `<td ${boldClass}>${content}</td>`; 
+        html += `<td ${boldClass}>${content || "-"}</td>`; 
       }
     });
     html += '</tr>';
