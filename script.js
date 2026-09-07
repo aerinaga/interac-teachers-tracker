@@ -233,7 +233,7 @@ async function doSearch() {
             rowVals[13],    // 14: MATERIAL
             rowVals[14],    // 15: MATERIAL URL
             rowVals[15],    // 16: FEEDBACK LINK
-            rowVals[16]     // 17: URL LINK
+            rowVals[16]     // 17: MEETING LINK
           ]);
         }
       }
@@ -269,7 +269,7 @@ function render(rows) {
     "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
     "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
     "USER ID", "PASSWORD", "TEACHER'S NAME", "TEACHER'S CLOUD LINK", 
-    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK", "URL LINK"
+    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK", "MEETING LINK"
   ];
 
   let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
