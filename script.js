@@ -197,8 +197,6 @@ async function doSearch() {
       if (!r.c) return;
 
       const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
-      
-      // Column M is index 12 (Teacher's name)
       const teacher = String(rowVals[12] || "").trim().toLowerCase();
 
       if (teacher === search) {
@@ -206,30 +204,28 @@ async function doSearch() {
 
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
           const studentGroup = String(rowVals[9] || "").trim();
-          
-          // Exception: If Student Name / Meeting Group contains "jp back up", suppress cloud link
           const isJpBackup = studentGroup.toLowerCase().includes("jp back up");
           const finalCloudLink = isJpBackup ? "-" : cloudLink;
 
           matchedRows.push([
-            rowVals[0],     // DATE (Col A) -> Index 0
-            rowVals[1],     // ACCESS (Col B) -> Index 1
-            rowVals[2],     // START (Col C) -> Index 2
-            rowVals[3],     // END (Col D) -> Index 3
-            rowVals[4],     // LESSON TYPE (Col E) -> Index 4
-            rowVals[5],     // Area (BoE) (Col F) -> Index 5
-            rowVals[6],     // SCHOOL (Col G) -> Index 6
-            rowVals[7],     // GRADE (Col H) -> Index 7
-            rowVals[8],     // CLASS (Col I) -> Index 8
-            rowVals[9],     // STUDENT'S NAME / MEETING GROUP (Col J) -> Index 9
-            rowVals[10],    // USER ID (Col K) -> Index 10
-            rowVals[11],    // PASSWORD (Col L) -> Index 11
-            rowVals[12],    // TEACHER'S NAME (Col M) -> Index 12
-            finalCloudLink, // TEACHER'S CLOUD LINK -> Index 13
-            rowVals[13],    // MATERIAL (Col N) -> Index 14
-            rowVals[14],    // MATERIAL URL (Col O) -> Index 15
-            rowVals[15],    // FEEDBACK LINK (Col P) -> Index 16
-            rowVals[16]     // URL LINK (Col Q) -> Index 17
+            rowVals[0],     // 0: DATE
+            rowVals[1],     // 1: ACCESS
+            rowVals[2],     // 2: START
+            rowVals[3],     // 3: END
+            rowVals[4],     // 4: LESSON TYPE
+            rowVals[5],     // 5: Area (BoE)
+            rowVals[6],     // 6: SCHOOL
+            rowVals[7],     // 7: GRADE
+            rowVals[8],     // 8: CLASS
+            rowVals[9],     // 9: STUDENT'S NAME
+            rowVals[10],    // 10: USER ID
+            rowVals[11],    // 11: PASSWORD
+            rowVals[12],    // 12: TEACHER'S NAME
+            finalCloudLink, // 13: TEACHER'S CLOUD LINK
+            rowVals[13],    // 14: MATERIAL
+            rowVals[14],    // 15: MATERIAL URL
+            rowVals[15],    // 16: FEEDBACK LINK
+            rowVals[16]     // 17: URL LINK
           ]);
         }
       }
@@ -270,7 +266,7 @@ function render(rows) {
 
   let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
 
-  rows.forEach(r => {
+  rows.forEach((r, rowIndex) => {
     const rawDateStr = String(r[0]); 
     let lessonEnd = new Date();
 
@@ -293,22 +289,39 @@ function render(rows) {
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
       if (i === 13) { // TEACHER'S CLOUD LINK
-        html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmMeeting('${content.replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">LINK</button></td>`
-          : `<td>-</td>`;
-      } else if (i === 15) { // MATERIAL URL (Handles multiple links cleanly)
+        if (content.startsWith('http')) {
+          const btnId = `cloud-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">LINK</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmMeeting(content, fullTimeStr, r[9], r[5]);
+          }, 0);
+        } else {
+          html += `<td>-</td>`;
+        }
+      } else if (i === 15) { // MATERIAL URL (Handles multiple links safely via element binding)
         if (isFinished) {
           html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
         } else if (content) {
           const urls = content.match(/https?:\/\/[^\s]+/g);
           if (urls && urls.length > 0) {
-            let buttonsHtml = '';
-            urls.forEach((u, idx) => {
-              const cleanUrl = u.trim().replace(/['"]/g, '');
-              const label = `OPEN ${idx + 1}`;
-              buttonsHtml += `<button class="btn-link" style="margin: 3px 0; display: block;" onclick="confirmMaterial('${cleanUrl}', '${String(r[14] || 'Material').replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">${label}</button>`;
-            });
-            html += `<td>${buttonsHtml}</td>`;
+            let cellId = `material-cell-${rowIndex}`;
+            html += `<td id="${cellId}"></td>`;
+            setTimeout(() => {
+              const cellTd = document.getElementById(cellId);
+              if (cellTd) {
+                cellTd.innerHTML = '';
+                urls.forEach((u, idx) => {
+                  const cleanUrl = u.trim().replace(/['"]/g, '');
+                  const btn = document.createElement('button');
+                  btn.className = 'btn-link';
+                  btn.style.cssText = 'margin: 3px 0; display: block;';
+                  btn.innerText = `OPEN ${idx + 1}`;
+                  btn.onclick = () => confirmMaterial(cleanUrl, r[14] || 'Material', fullTimeStr, r[9], r[5]);
+                  cellTd.appendChild(btn);
+                });
+              }
+            }, 0);
           } else {
             html += `<td>-</td>`;
           }
@@ -316,15 +329,34 @@ function render(rows) {
           html += `<td>-</td>`;
         }
       } else if (i === 16) { // FEEDBACK LINK
-        html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content.replace(/'/g, "\\'")}', 'Feedback Link')">OPEN</button></td>`
-          : `<td>No Feedback</td>`;
+        if (content.startsWith('http')) {
+          const btnId = `feedback-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmGenericLink(content, 'Feedback Link');
+          }, 0);
+        } else {
+          html += `<td>No Feedback</td>`;
+        }
       } else if (i === 17) { // URL LINK (Col Q)
-        html += content.startsWith('http')
-          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content.replace(/'/g, "\\'")}', 'URL Link')">OPEN</button></td>`
-          : `<td>-</td>`;
+        if (content.startsWith('http')) {
+          const btnId = `urllink-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmGenericLink(content, 'URL Link');
+          }, 0);
+        } else {
+          html += `<td>-</td>`;
+        }
       } else if (content.startsWith('http')) { 
-        html += `<td><button class="btn-link" onclick="confirmMeeting('${content.replace(/'/g, "\\'")}', '${fullTimeStr}', '${String(r[9]).replace(/'/g, "\\'")}', '${String(r[5]).replace(/'/g, "\\'")}')">LINK</button></td>`;
+        const btnId = `generic-btn-${rowIndex}-${i}`;
+        html += `<td><button id="${btnId}" class="btn-link">LINK</button></td>`;
+        setTimeout(() => {
+          const btn = document.getElementById(btnId);
+          if (btn) btn.onclick = () => confirmMeeting(content, fullTimeStr, r[9], r[5]);
+        }, 0);
       } else { 
         html += `<td ${boldClass}>${content || "-"}</td>`; 
       }
