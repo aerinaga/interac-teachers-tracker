@@ -107,7 +107,7 @@ body {
   justify-content: flex-end;
   gap: 0;
   margin-top: 5px;
-  padding-right: 16px;
+  padding-right: 35px; /* Added more padding on the right to keep text clear of her */
   position: relative;
   z-index: 2;
 }
@@ -121,15 +121,15 @@ body {
   white-space: nowrap;
 }
 
-/* Large Character Image - Shifted Up and Aligned to Word */
+/* Large Character Image */
 .backup-pointer-img {
   height: 220px;            
   width: auto;             
   object-fit: contain;     
   transform: scaleX(-1);   
   filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.2));
-  margin-left: -70px;      /* Pulls her finger further left into the text */
-  margin-top: -20px;       /* Shifts her higher up relative to the text line */
+  margin-left: -35px;      /* Reduced overlap space */
+  margin-top: -20px;       
   margin-right: -20px;     
   pointer-events: none;
 }
