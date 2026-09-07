@@ -131,7 +131,7 @@ function parseSheetDate(rawDateStr) {
   return null;
 }
 
-// Fetch cell B1 directly from the CSV output format to bypass GViz header stripping
+// Fetch cell B1 directly from CSV endpoint
 async function fetchCellB1Url() {
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:csv&range=B1:F1`;
   try {
@@ -151,9 +151,7 @@ async function doSearch() {
 
   Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-  // Fetch Teacher Login URL from Row 1 first
   const cloudLink = await fetchCellB1Url();
-
   const testUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:json`;
 
   try {
@@ -203,24 +201,30 @@ async function doSearch() {
         const lessonDate = parseSheetDate(rowVals[0]);
 
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
+          const studentGroup = String(rowVals[9] || "").trim();
+          
+          // Exception: If Student Name / Meeting Group contains "jp back up", clear cloudLink for this row
+          const isJpBackup = studentGroup.toLowerCase().includes("jp back up");
+          const finalCloudLink = isJpBackup ? "-" : cloudLink;
+
           matchedRows.push([
-            rowVals[0],  // DATE (Col A) -> Index 0
-            rowVals[1],  // ACCESS (Col B) -> Index 1
-            rowVals[2],  // START (Col C) -> Index 2
-            rowVals[3],  // END (Col D) -> Index 3
-            rowVals[4],  // LESSON TYPE (Col E) -> Index 4
-            rowVals[5],  // Area (BoE) (Col F) -> Index 5
-            rowVals[6],  // SCHOOL (Col G) -> Index 6
-            rowVals[7],  // GRADE (Col H) -> Index 7
-            rowVals[8],  // CLASS (Col I) -> Index 8
-            rowVals[9],  // STUDENT'S NAME / MEETING GROUP (Col J) -> Index 9
-            rowVals[10], // USER ID (Col K) -> Index 10
-            rowVals[11], // PASSWORD (Col L) -> Index 11
-            rowVals[12], // TEACHER'S NAME (Col M) -> Index 12
-            cloudLink,   // TEACHER'S CLOUD LINK (Fetched from B1:F1 CSV endpoint) -> Index 13
-            rowVals[13], // MATERIAL (Col N) -> Index 14
-            rowVals[14], // MATERIAL URL (Col O) -> Index 15
-            rowVals[15]  // FEEDBACK LINK (Col P) -> Index 16
+            rowVals[0],     // DATE (Col A) -> Index 0
+            rowVals[1],     // ACCESS (Col B) -> Index 1
+            rowVals[2],     // START (Col C) -> Index 2
+            rowVals[3],     // END (Col D) -> Index 3
+            rowVals[4],     // LESSON TYPE (Col E) -> Index 4
+            rowVals[5],     // Area (BoE) (Col F) -> Index 5
+            rowVals[6],     // SCHOOL (Col G) -> Index 6
+            rowVals[7],     // GRADE (Col H) -> Index 7
+            rowVals[8],     // CLASS (Col I) -> Index 8
+            rowVals[9],     // STUDENT'S NAME / MEETING GROUP (Col J) -> Index 9
+            rowVals[10],    // USER ID (Col K) -> Index 10
+            rowVals[11],    // PASSWORD (Col L) -> Index 11
+            rowVals[12],    // TEACHER'S NAME (Col M) -> Index 12
+            finalCloudLink, // TEACHER'S CLOUD LINK -> Index 13 (Skipped for JP Back up)
+            rowVals[13],    // MATERIAL (Col N) -> Index 14
+            rowVals[14],    // MATERIAL URL (Col O) -> Index 15
+            rowVals[15]     // FEEDBACK LINK (Col P) -> Index 16
           ]);
         }
       }
