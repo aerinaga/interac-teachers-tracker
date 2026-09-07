@@ -13,13 +13,6 @@ body {
   padding: 16px;
   position: relative;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Page wrapper to push footer down correctly */
-.page-wrapper {
-  flex: 1;
 }
 
 /* Background Logo */
@@ -41,7 +34,7 @@ body {
 .search-container {
   position: relative;
   z-index: 1;
-  text-align: right;
+  text-align: center;
   width: 100%;
   max-width: 100%;
   margin: 0 auto 10px auto;
@@ -56,7 +49,6 @@ body {
   letter-spacing: -0.3px;
   margin: 0 0 4px 0;
   text-transform: uppercase;
-  text-align: center;
 }
 
 #date-range-note {
@@ -64,7 +56,6 @@ body {
   font-weight: 700;
   color: #1c1c1e;
   margin-bottom: 12px;
-  text-align: center;
 }
 
 /* Search Input & Button */
@@ -107,7 +98,6 @@ body {
   font-weight: 700;
   color: #3a3a3c;
   margin-top: 6px;
-  text-align: center;
 }
 
 /* Backup Notice Section */
@@ -116,8 +106,8 @@ body {
   align-items: center;
   justify-content: flex-end;
   gap: 0;
-  margin-top: 15px;
-  padding-right: 20px;
+  margin-top: 5px;
+  padding-right: 16px;
   position: relative;
   z-index: 2;
 }
@@ -128,20 +118,19 @@ body {
   font-weight: 800;
   color: #d70015;
   margin: 0;
-  margin-right: 20px;
-  line-height: 1.4;
+  white-space: nowrap;
 }
 
-/* Character Image */
+/* Large Character Image - Shifted Up and Aligned to Word */
 .backup-pointer-img {
-  height: 185px;            
+  height: 220px;            
   width: auto;             
   object-fit: contain;     
   transform: scaleX(-1);   
   filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.2));
-  margin-left: -20px;      
-  margin-top: 10px;       
-  margin-right: -10px;     
+  margin-left: -70px;      /* Pulls her finger further left into the text */
+  margin-top: -20px;       /* Shifts her higher up relative to the text line */
+  margin-right: -20px;     
   pointer-events: none;
 }
 
@@ -158,23 +147,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-}
-
-/* Minimalist Copyright Footer Styles (Safely at the bottom, no white divider line) */
-.site-footer {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  margin-top: 30px;
-  padding: 10px 0;
-}
-
-.site-footer p {
-  font-size: 11px;
-  font-weight: 700;
-  color: #3a3a3c;
-  letter-spacing: 0.5px;
-  margin: 0;
 }
 
 /* Table Styles */
