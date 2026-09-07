@@ -1,12 +1,12 @@
 /* Import Inter Font for iOS-like Typography */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Base Layout (Clean Solid White Page) */
+/* Base Layout (Light Gray Backdrop) */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
+  background-color: #f0f2f5; /* Subtle cool-gray tint to pop white glass panels */
   color: #1c1c1e;
   font-weight: 500;
   margin: 0;
@@ -15,32 +15,38 @@ body {
   min-height: 100vh;
 }
 
-/* Large Background Watermark Logo */
+/* Centered High-Contrast Background Logo */
 .bg-logo {
   position: fixed;
-  top: 35%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60vw;          /* Large width display */
-  max-width: 800px;     /* Cap width for ultra-wide monitors */
+  width: 75vw;          /* Prominent screen width presence */
+  max-width: 900px;     /* Cap width for high-res desktop screens */
   height: auto;
-  opacity: 0.85;        /* High visibility watermark background */
-  z-index: 0;           /* Keeps image strictly behind input fields & table */
-  pointer-events: none; /* Allows user clicks to pass through to buttons */
+  opacity: 0.95;        /* Vibrant color rendering */
+  z-index: 0;           /* Sits strictly behind content */
+  pointer-events: none; /* Mouse clicks pass through directly */
   object-fit: contain;
 }
 
-/* Header & Search Container */
+/* Frosted Glass Header & Search Container */
 .search-container {
   position: relative;
   z-index: 1;
   text-align: center;
   max-width: 650px;
   margin: 0 auto 15px auto;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  padding: 16px 20px;
-  border-radius: 12px;
+  
+  /* Glassmorphism Effect */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  padding: 18px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .search-container h2 {
@@ -75,7 +81,7 @@ body {
   border-radius: 8px;
   font-size: 13px;
   outline: none;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .search-box button {
@@ -92,23 +98,29 @@ body {
 .search-container small {
   display: block;
   font-size: 11px;
-  color: #8e8e93;
+  color: #636366;
   margin-top: 6px;
 }
 
-/* Results Wrapper (Fit-to-Screen) */
+/* Frosted Glass Results Table Card */
 #results {
   position: relative;
   z-index: 1;
   width: 100%;
   margin-top: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(4px);
-  border-radius: 10px;
+  
+  /* Translucent Glass Table Base */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
-/* Fixed Table Layout for Single-Screen View */
+/* Table Layout (Fit to Screen Width) */
 table {
   width: 100%;
   table-layout: fixed;
@@ -118,9 +130,9 @@ table {
   font-size: 11px;
 }
 
-/* Yellow Headers */
+/* Golden Yellow Table Headers */
 th {
-  background-color: #f1c232;
+  background-color: rgba(241, 194, 50, 0.92);
   color: #000000;
   font-weight: 800;
   font-size: 10px;
@@ -131,19 +143,19 @@ th {
   line-height: 1.1;
 }
 
-/* Compact Table Cells */
+/* Table Cells */
 td {
   padding: 6px 4px;
   text-align: center;
-  border-bottom: 1px solid #e5e5ea;
-  border-right: 1px solid #f2f2f7;
+  border-bottom: 1px solid rgba(229, 229, 234, 0.7);
+  border-right: 1px solid rgba(242, 242, 247, 0.7);
   color: #1c1c1e;
   font-weight: 600;
   line-height: 1.2;
 }
 
 tr:hover {
-  background-color: rgba(0, 122, 255, 0.05);
+  background-color: rgba(0, 122, 255, 0.08);
 }
 
 .bold-col {
@@ -166,13 +178,13 @@ tr:hover {
 }
 
 .badge-finished {
-  background-color: #f2f2f7;
+  background-color: rgba(242, 242, 247, 0.8);
   color: #8e8e93;
   border: 1px solid #c7c7cc;
 }
 
 .finished-row {
-  opacity: 0.55;
+  opacity: 0.65;
 }
 
 /* Action Buttons */
@@ -191,7 +203,7 @@ tr:hover {
 }
 
 .btn-disabled {
-  background-color: #e5e5ea;
+  background-color: rgba(229, 229, 234, 0.8);
   color: #8e8e93 !important;
   cursor: not-allowed;
   padding: 3px 8px;
