@@ -5,46 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lesson Tracker</title>
   
-  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   
-  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-  <!-- Background Watermark Logo -->
   <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
 
-  <div class="search-container">
-    <h2>INTERAC LESSON TEACHERS TRACKER</h2>
-    <p id="date-range-note"></p>
-    
-    <div class="search-box">
-      <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)" onkeydown="if(event.key === 'Enter') doSearch()">
-      <button onclick="doSearch()">Search</button>
-    </div>
-    <small>Type your Teacher's Name only (e.g., enter "Clayd", not "Teacher Clayd").</small>
-
-    <!-- Two-Line Separated Backup Notice -->
-    <div class="backup-note-container">
-      <div class="backup-note">
-        *If you are a JP Back up,<br>
-        the back up link is in <strong>USER ID</strong> section.
+  <div class="page-wrapper">
+    <div class="search-container">
+      <h2>INTERAC LESSON TEACHERS TRACKER</h2>
+      <p id="date-range-note"></p>
+      
+      <div class="search-box">
+        <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)" onkeydown="if(event.key === 'Enter') doSearch()">
+        <button onclick="doSearch()">Search</button>
       </div>
-      <img src="Yuha1.png" alt="Pointer" class="backup-pointer-img">
+      <small>Type your Teacher's Name only (e.g., enter "Clayd", not "Teacher Clayd").</small>
+
+      <div class="backup-note-container">
+        <div class="backup-note">
+          *If you are a JP Back up,<br>
+          the back up link is in <strong>USER ID</strong> section.
+        </div>
+        <img src="Yuha1.png" alt="Pointer" class="backup-pointer-img">
+      </div>
     </div>
+
+    <div id="results"></div>
   </div>
 
-  <!-- Results Table Container -->
-  <div id="results"></div>
-
-  <!-- Minimalist Copyright Footer -->
   <footer class="site-footer">
     <p>© 2026 appleofyves_ • All Rights Reserved</p>
   </footer>
 
-  <!-- Custom JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
