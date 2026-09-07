@@ -225,10 +225,11 @@ async function doSearch() {
             rowVals[10],    // USER ID (Col K) -> Index 10
             rowVals[11],    // PASSWORD (Col L) -> Index 11
             rowVals[12],    // TEACHER'S NAME (Col M) -> Index 12
-            finalCloudLink, // TEACHER'S CLOUD LINK -> Index 13 (Skipped for JP Back up)
+            finalCloudLink, // TEACHER'S CLOUD LINK -> Index 13
             rowVals[13],    // MATERIAL (Col N) -> Index 14
             rowVals[14],    // MATERIAL URL (Col O) -> Index 15
-            rowVals[15]     // FEEDBACK LINK (Col P) -> Index 16
+            rowVals[15],    // FEEDBACK LINK (Col P) -> Index 16
+            rowVals[16]     // URL LINK (Col Q) -> Index 17
           ]);
         }
       }
@@ -264,7 +265,7 @@ function render(rows) {
     "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
     "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
     "USER ID", "PASSWORD", "TEACHER'S NAME", "TEACHER'S CLOUD LINK", 
-    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK"
+    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK", "URL LINK"
   ];
 
   let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
@@ -305,6 +306,10 @@ function render(rows) {
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
           : `<td>No Feedback</td>`;
+      } else if (i === 17) { // URL LINK (Col Q)
+        html += content.startsWith('http')
+          ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'URL Link')">OPEN</button></td>`
+          : `<td>-</td>`;
       } else if (content.startsWith('http')) { 
         html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`;
       } else { 
