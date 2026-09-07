@@ -107,7 +107,7 @@ body {
   justify-content: flex-end;
   gap: 0;
   margin-top: 5px;
-  padding-right: 35px; /* Added more padding on the right to keep text clear of her */
+  padding-right: 25px;
   position: relative;
   z-index: 2;
 }
@@ -121,16 +121,16 @@ body {
   white-space: nowrap;
 }
 
-/* Large Character Image */
+/* Slightly Smaller Character Image */
 .backup-pointer-img {
-  height: 220px;            
+  height: 185px;            /* Reduced size so she sits comfortably next to text */
   width: auto;             
   object-fit: contain;     
   transform: scaleX(-1);   
   filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.2));
-  margin-left: -35px;      /* Reduced overlap space */
-  margin-top: -20px;       
-  margin-right: -20px;     
+  margin-left: -25px;      /* Adjusted offset for the smaller size */
+  margin-top: -15px;       
+  margin-right: -10px;     
   pointer-events: none;
 }
 
