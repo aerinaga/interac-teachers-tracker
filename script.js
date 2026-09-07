@@ -1,5 +1,5 @@
-const SPREADSHEET_ID = "1qd8ivmSZ_FlepT5woZTTwzSvB_0PTfb0gh4ozWOQu10";
-const SHEET_TAB_NAME = "Lesson Info for Interact"; 
+const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
+const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 window.onload = function() {
@@ -33,18 +33,20 @@ function confirmMeeting(url, timeStr, studentName, area) {
   }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
 }
 
-function formatCellDate(val) {
-  if (!val) return "";
-  if (typeof val === 'string' && val.startsWith('Date(')) {
-    const parts = val.match(/\d+/g);
-    if (parts) {
-      const year = parts[0];
-      const month = String(parseInt(parts[1]) + 1).padStart(2, '0');
-      const day = String(parts[2]).padStart(2, '0');
-      return `${year}/${month}/${day}`;
+// Helper to parse date text like "07/September(Mon)" into a JavaScript Date object
+function parseSheetDate(rawDateStr) {
+  if (!rawDateStr) return null;
+  const match = String(rawDateStr).match(/^(\d{1,2})\/([A-Za-z]+)/);
+  if (match) {
+    const day = parseInt(match[1]);
+    const monthName = match[2];
+    const monthIdx = months.findIndex(m => m.toLowerCase().startsWith(monthName.toLowerCase()));
+    if (monthIdx !== -1) {
+      const currentYear = new Date().getFullYear();
+      return new Date(currentYear, monthIdx, day);
     }
   }
-  return String(val);
+  return null;
 }
 
 async function doSearch() {
@@ -80,36 +82,55 @@ async function doSearch() {
       return;
     }
 
+    // Retrieve Teacher Cloud Link from cell B1 (Row index 0, Col B)
+    let cloudLink = "";
+    if (allRows[0] && allRows[0].c && allRows[0].c[1]) {
+      cloudLink = allRows[0].c[1].v || allRows[0].c[1].f || "";
+    }
+
     const search = q.trim().toLowerCase();
     const matchedRows = [];
+
+    // Define 2-week date range boundary (Today at 00:00 to Today + 14 Days at 23:59)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const twoWeeksEnd = new Date();
+    twoWeeksEnd.setDate(todayStart.getDate() + 14);
+    twoWeeksEnd.setHours(23, 59, 59, 999);
 
     allRows.forEach(r => {
       if (!r.c) return;
       const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
       
-      // Column P is index 15 (0-based: A=0... P=15)
-      const teacher = String(rowVals[15] || "").trim().toLowerCase();
+      // Column M is index 12 (Teacher's name)
+      const teacher = String(rowVals[12] || "").trim().toLowerCase();
 
       if (teacher === search) {
-        matchedRows.push([
-          formatCellDate(rowVals[2]),  // Date (Col C)
-          rowVals[3],                  // Access (Col D)
-          rowVals[4],                  // Start (Col E)
-          rowVals[5],                  // End (Col F)
-          rowVals[19],                 // Material Name (Col T)
-          rowVals[20],                 // Material URL (Col U)
-          rowVals[18],                 // Meeting URL (Col S)
-          rowVals[15],                 // Teacher (Col P)
-          rowVals[13],                 // Student (Col N)
-          rowVals[14],                 // Password (Col O)
-          rowVals[21],                 // FB Form (Col V)
-          rowVals[6],                  // Type (Col G)
-          rowVals[7],                  // Area (Col H)
-          rowVals[8],                  // School (Col I)
-          rowVals[9],                  // Grade (Col J)
-          rowVals[10],                 // Class (Col K)
-          rowVals[11]                  // Period (Col L)
-        ]);
+        const lessonDate = parseSheetDate(rowVals[0]);
+
+        // Filter: Only include row if date is valid AND falls within the 2-week range
+        if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
+          matchedRows.push([
+            rowVals[0],  // DATE (Col A)
+            rowVals[1],  // ACCESS (Col B)
+            rowVals[2],  // START (Col C)
+            rowVals[3],  // END (Col D)
+            rowVals[4],  // LESSON TYPE (Col E)
+            rowVals[5],  // Area (BoE) (Col F)
+            rowVals[6],  // SCHOOL (Col G)
+            rowVals[7],  // GRADE (Col H)
+            rowVals[8],  // CLASS (Col I)
+            rowVals[9],  // STUDENT'S NAME / MEETING GROUP (Col J)
+            rowVals[10], // USER ID (Col K)
+            rowVals[11], // PASSWORD (Col L)
+            rowVals[12], // TEACHER'S NAME (Col M)
+            cloudLink,   // TEACHER'S CLOUD LINK (Pulled from Cell B1)
+            rowVals[13], // MATERIAL (Col N)
+            rowVals[14], // MATERIAL URL (Col O)
+            rowVals[15]  // FEEDBACK LINK (Col P)
+          ]);
+        }
       }
     });
 
@@ -117,7 +138,7 @@ async function doSearch() {
       Swal.fire({ 
         icon: 'info', 
         title: 'No Lessons Found', 
-        text: `No exact matches found for "${q}" on tab "${SHEET_TAB_NAME}".` 
+        text: `No lessons found for "${q}" within the next 2 weeks on tab "${SHEET_TAB_NAME}".` 
       });
       document.getElementById('results').innerHTML = "";
       return;
@@ -138,23 +159,26 @@ async function doSearch() {
 
 function render(rows) {
   const now = new Date();
-  const headers = ["Status", "Date", "Access", "Start", "END", "Material", "Material URL", "Meeting URL", "Teacher", "Student/Group Name (User ID)", "Password", "FB Form", "Type", "Area", "School", "Grade", "Class", "Lesson Period"];
+  
+  // Exact 18 Headers in sequence
+  const headers = [
+    "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
+    "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
+    "USER ID", "PASSWORD", "TEACHER'S NAME", "TEACHER'S CLOUD LINK", 
+    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK"
+  ];
+
   let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
 
   rows.forEach(r => {
-    const dateParts = String(r[0]).split('/');
-    let dateDisplay = r[0];
+    const rawDateStr = String(r[0]); 
     let lessonEnd = new Date();
 
-    if (dateParts.length === 3) {
-      const day = parseInt(dateParts[2]);
-      const monthIdx = parseInt(dateParts[1]) - 1;
-      const monthName = months[monthIdx] || "";
-      dateDisplay = `${day}/${monthName}`;
-
+    const lessonDateObj = parseSheetDate(rawDateStr);
+    if (lessonDateObj) {
       const endHour = r[3] ? parseInt(String(r[3]).split(':')[0]) : 0;
       const endMin = r[3] ? parseInt(String(r[3]).split(':')[1]) : 0;
-      lessonEnd = new Date(dateParts[0], monthIdx, day, endHour, endMin);
+      lessonEnd = new Date(lessonDateObj.getFullYear(), lessonDateObj.getMonth(), lessonDateObj.getDate(), endHour, endMin);
     }
 
     const fullTimeStr = `${r[1]} ${r[2]}~${r[3]}`;
@@ -162,22 +186,25 @@ function render(rows) {
     const rowClass = isFinished ? 'class="finished-row"' : '';
     const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
 
+    // 1. Render STATUS badge first
     html += `<tr ${rowClass}><td>${badge}</td>`;
 
+    // 2. Render remaining 17 data cells
     r.forEach((cell, i) => {
       let content = cell || "-";
-      if (i === 0) content = dateDisplay;
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
       if (String(content).includes('http')) {
-        if (i === 5) { // Material URL
-          html += isFinished ? `<td><span class="btn-link btn-disabled">Closed</span></td>` : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[4]}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Open</button></td>`;
-        } else if (i === 6) { // Meeting URL
-          html += isFinished ? `<td><span style="color:#999">Ended</span></td>` : `<td><button class="raw-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[8]}', '${r[12]}')">Link</button></td>`;
-        } else if (i === 10) { // FB Form
+        if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 in data array)
+          html += `<td><a class="btn-link" href="${content}" target="_blank">Login Portal</a></td>`;
+        } else if (i === 15) { // MATERIAL URL (Index 15 in data array)
+          html += isFinished 
+            ? `<td><span class="btn-link btn-disabled">Closed</span></td>` 
+            : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Open</button></td>`;
+        } else if (i === 16) { // FEEDBACK LINK (Index 16 in data array)
           html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
         } else { 
-          html += `<td>${content}</td>`; 
+          html += `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`; 
         }
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
