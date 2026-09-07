@@ -11,25 +11,36 @@ body {
   font-weight: 500;
   margin: 0;
   padding: 16px;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Large Background Watermark Logo */
+.bg-logo {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw;          /* Large width display */
+  max-width: 800px;     /* Cap width for ultra-wide monitors */
+  height: auto;
+  opacity: 0.85;        /* High visibility watermark background */
+  z-index: 0;           /* Keeps image strictly behind input fields & table */
+  pointer-events: none; /* Allows user clicks to pass through to buttons */
+  object-fit: contain;
 }
 
 /* Header & Search Container */
 .search-container {
+  position: relative;
+  z-index: 1;
   text-align: center;
   max-width: 650px;
   margin: 0 auto 15px auto;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
   padding: 16px 20px;
   border-radius: 12px;
-}
-
-/* Transparent PNG Logo Styling */
-.header-logo {
-  max-width: 180px;
-  height: auto;
-  display: block;
-  margin: 0 auto 12px auto;
-  object-fit: contain;
 }
 
 .search-container h2 {
@@ -64,7 +75,7 @@ body {
   border-radius: 8px;
   font-size: 13px;
   outline: none;
-  background-color: #f9f9fb;
+  background-color: #ffffff;
 }
 
 .search-box button {
@@ -87,9 +98,12 @@ body {
 
 /* Results Wrapper (Fit-to-Screen) */
 #results {
+  position: relative;
+  z-index: 1;
   width: 100%;
   margin-top: 10px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -129,7 +143,7 @@ td {
 }
 
 tr:hover {
-  background-color: #f9f9fb;
+  background-color: rgba(0, 122, 255, 0.05);
 }
 
 .bold-col {
