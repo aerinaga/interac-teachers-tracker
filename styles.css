@@ -1,117 +1,126 @@
-/* Base Layout & Typography */
+/* Base Layout & Fonts */
 body {
-  font-family: Roboto, Arial, sans-serif;
-  background-color: #f8f9fa;
-  color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ffffff;
+  color: #333333;
   margin: 0;
-  padding: 20px;
+  padding: 20px 10px;
 }
 
-/* Search Box & Header Area */
+/* Header & Search Section */
 .search-container {
-  background: #fff;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  max-width: 600px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 15px auto;
 }
 
 .search-container h2 {
-  margin-top: 0;
-  color: #202124;
+  color: #1a73e8; /* Bold Blue Title */
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
 }
 
 #date-range-note {
-  font-size: 0.9em;
-  color: #5f6368;
-  margin-bottom: 16px;
+  font-size: 13px;
+  color: #555555;
+  margin-bottom: 20px;
 }
 
+/* Search Box & Button */
 .search-box {
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 10px;
+  margin-bottom: 6px;
 }
 
 .search-box input[type="text"] {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #dadce0;
+  width: 280px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
   outline: none;
 }
 
-.search-box input[type="text"]:focus {
-  border-color: #1a73e8;
-}
-
 .search-box button {
-  padding: 10px 20px;
-  background-color: #fbbc04;
-  color: #000;
+  padding: 8px 24px;
+  background-color: #1a73e8; /* Bright Blue Search Button */
+  color: #ffffff;
   font-weight: bold;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .search-box button:hover {
-  background-color: #f2b103;
+  background-color: #1557b0;
 }
 
-/* Container scroll wrapper for wide table layout */
+.search-container small {
+  display: block;
+  font-size: 12px;
+  color: #777777;
+  margin-top: 6px;
+}
+
+/* Table Scroll Wrapper */
 #results {
   width: 100%;
   overflow-x: auto;
-  margin-top: 20px;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 15px;
 }
 
+/* Table Base Styling */
 table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap; /* Prevents cell content from wrapping awkwardly */
-  font-size: 13px;
+  white-space: nowrap;
+  font-size: 12px;
 }
 
-/* Yellow Header Row */
+/* Golden Yellow Table Headers */
 th {
-  background-color: #fbbc04;
-  color: #000;
+  background-color: #f1c232;
+  color: #000000;
   font-weight: bold;
+  font-size: 11px;
   text-transform: uppercase;
-  padding: 12px;
-  border: 1px solid #e0a800;
-  text-align: left;
+  padding: 10px 8px;
+  border: 1px solid #d9a712;
+  text-align: center;
 }
 
+/* Table Cells */
 td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
   border-right: 1px solid #f0f0f0;
+  color: #333333;
 }
 
-tr:nth-child(even) {
-  background-color: #fafafa;
+tr:hover {
+  background-color: #f9f9f9;
 }
 
-/* Emphasize Date and Time columns */
+/* Bold Columns (Date & Times) */
 .bold-col {
   font-weight: bold;
 }
 
-/* Status Badges */
+/* Pill Badges (STATUS) */
 .badge {
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
   font-weight: bold;
-  font-size: 0.85em;
   display: inline-block;
-  text-align: center;
 }
 
 .badge-upcoming {
@@ -126,23 +135,24 @@ tr:nth-child(even) {
   border: 1px solid #dadce0;
 }
 
-/* Dim row style for finished lessons */
+/* Finished Row Dimming */
 .finished-row {
-  opacity: 0.65;
-  background-color: #f9f9f9 !important;
+  opacity: 0.6;
 }
 
-/* Button & Link Styles */
+/* Blue Action Buttons ("OPEN") */
 .btn-link {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 4px 16px;
   background-color: #1a73e8;
-  color: #fff !important;
+  color: #ffffff !important;
   text-decoration: none;
   border-radius: 4px;
   border: none;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 0.85em;
+  font-size: 11px;
+  text-transform: uppercase;
 }
 
 .btn-link:hover {
@@ -155,12 +165,10 @@ tr:nth-child(even) {
   cursor: not-allowed;
 }
 
+/* Text Link ("Link") */
 .raw-link {
   color: #1a73e8;
   text-decoration: underline;
   cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 13px;
+  font-size: 12px;
 }
