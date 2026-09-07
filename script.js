@@ -9,7 +9,6 @@ window.onload = function() {
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
 };
 
-// Confirmation modal for materials
 function confirmMaterial(url, materialName, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -46,7 +45,6 @@ function confirmMaterial(url, materialName, timeStr, studentName, area) {
   });
 }
 
-// Confirmation modal for meeting links (Zoom/Teams/Portals)
 function confirmMeeting(url, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -83,7 +81,6 @@ function confirmMeeting(url, timeStr, studentName, area) {
   });
 }
 
-// Generic link confirmation for generic or raw links
 function confirmGenericLink(url, label) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -119,7 +116,6 @@ function confirmGenericLink(url, label) {
   });
 }
 
-// Helper to parse date text like "07/September(Mon)" into a JavaScript Date object
 function parseSheetDate(rawDateStr) {
   if (!rawDateStr) return null;
   const match = String(rawDateStr).match(/^(\d{1,2})\/([A-Za-z]+)/);
@@ -135,18 +131,18 @@ function parseSheetDate(rawDateStr) {
   return null;
 }
 
-// Extract clean HTTP string across merged cells or text properties
-function parseUrlFromMergedCell(cell) {
-  if (!cell) return "";
-  const strV = String(cell.v || "").trim();
-  const strF = String(cell.f || "").trim();
-
-  if (strV.startsWith("http")) return strV;
-  if (strF.startsWith("http")) return strF;
-
-  // Regex extract if wrapped in HYPERLINK(...) or rich text format
-  const match = (strV + " " + strF).match(/https?:\/\/[^\s"',<)]+/i);
-  return match ? match[0] : "";
+// Fetch cell B1 directly from the CSV output format to bypass GViz header stripping
+async function fetchCellB1Url() {
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:csv&range=B1:F1`;
+  try {
+    const response = await fetch(csvUrl);
+    const text = await response.text();
+    const match = text.match(/https?:\/\/[^\s"',\)\n]+/i);
+    return match ? match[0] : "";
+  } catch (e) {
+    console.error("Failed to fetch B1 URL:", e);
+    return "";
+  }
 }
 
 async function doSearch() {
@@ -154,6 +150,9 @@ async function doSearch() {
   if (!q) return;
 
   Swal.fire({ title: 'Searching...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+  // Fetch Teacher Login URL from Row 1 first
+  const cloudLink = await fetchCellB1Url();
 
   const testUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:json`;
 
@@ -182,22 +181,9 @@ async function doSearch() {
       return;
     }
 
-    // Scrape Row 0 across Columns B through F to reliably grab the URL from merged cell B1:F1
-    let cloudLink = "";
-    if (allRows[0] && allRows[0].c) {
-      for (let colIdx = 1; colIdx <= 5; colIdx++) {
-        const foundUrl = parseUrlFromMergedCell(allRows[0].c[colIdx]);
-        if (foundUrl) {
-          cloudLink = foundUrl;
-          break;
-        }
-      }
-    }
-
     const search = q.trim().toLowerCase();
     const matchedRows = [];
 
-    // Define 2-week date range boundary (Today at 00:00 to Today + 14 Days at 23:59)
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -208,7 +194,6 @@ async function doSearch() {
     allRows.forEach(r => {
       if (!r.c) return;
 
-      // Extract raw cell values or formatted strings
       const rowVals = r.c.map(cell => (cell ? (cell.f || cell.v || "") : ""));
       
       // Column M is index 12 (Teacher's name)
@@ -217,7 +202,6 @@ async function doSearch() {
       if (teacher === search) {
         const lessonDate = parseSheetDate(rowVals[0]);
 
-        // Filter: Only include row if date is valid AND falls within the 2-week range
         if (lessonDate && lessonDate >= todayStart && lessonDate <= twoWeeksEnd) {
           matchedRows.push([
             rowVals[0],  // DATE (Col A) -> Index 0
@@ -233,7 +217,7 @@ async function doSearch() {
             rowVals[10], // USER ID (Col K) -> Index 10
             rowVals[11], // PASSWORD (Col L) -> Index 11
             rowVals[12], // TEACHER'S NAME (Col M) -> Index 12
-            cloudLink,   // TEACHER'S CLOUD LINK (Pulled from Merged B1:F1) -> Index 13
+            cloudLink,   // TEACHER'S CLOUD LINK (Fetched from B1:F1 CSV endpoint) -> Index 13
             rowVals[13], // MATERIAL (Col N) -> Index 14
             rowVals[14], // MATERIAL URL (Col O) -> Index 15
             rowVals[15]  // FEEDBACK LINK (Col P) -> Index 16
@@ -268,7 +252,6 @@ async function doSearch() {
 function render(rows) {
   const now = new Date();
   
-  // 18 Headers aligned with indexed row data
   const headers = [
     "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
     "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
@@ -294,25 +277,23 @@ function render(rows) {
     const rowClass = isFinished ? 'class="finished-row"' : '';
     const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
 
-    // 1. Render STATUS badge first
     html += `<tr ${rowClass}><td>${badge}</td>`;
 
-    // 2. Render remaining data cells matching strict header indices
     r.forEach((cell, i) => {
       let content = String(cell || "-").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-      if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 - Extracted from merged B1:F1)
+      if (i === 13) { // TEACHER'S CLOUD LINK
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`
           : `<td>-</td>`;
-      } else if (i === 15) { // MATERIAL URL (Index 15)
+      } else if (i === 15) { // MATERIAL URL
         html += isFinished 
           ? `<td><span class="btn-link btn-disabled">CLOSED</span></td>` 
           : content.startsWith('http')
             ? `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`
             : `<td>-</td>`;
-      } else if (i === 16) { // FEEDBACK LINK (Index 16)
+      } else if (i === 16) { // FEEDBACK LINK
         html += content.startsWith('http')
           ? `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`
           : `<td>No Feedback</td>`;
