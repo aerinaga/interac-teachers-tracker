@@ -290,8 +290,8 @@ function render(rows) {
         } else if (i === 16) { // FEEDBACK LINK (Index 16 in data array)
           html += `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`;
         } else { 
-          // Replaced 'raw-link' link with styled blue 'btn-link' button
-          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`; 
+          // Uses blue button style (btn-link) with LINK label
+          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">LINK</button></td>`; 
         }
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
