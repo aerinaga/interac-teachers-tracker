@@ -1,20 +1,107 @@
+/* Base Layout & Typography */
+body {
+  font-family: Roboto, Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Search Box & Header Area */
+.search-container {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  max-width: 600px;
+}
+
+.search-container h2 {
+  margin-top: 0;
+  color: #202124;
+}
+
+#date-range-note {
+  font-size: 0.9em;
+  color: #5f6368;
+  margin-bottom: 16px;
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+}
+
+.search-box input[type="text"] {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-box input[type="text"]:focus {
+  border-color: #1a73e8;
+}
+
+.search-box button {
+  padding: 10px 20px;
+  background-color: #fbbc04;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-box button:hover {
+  background-color: #f2b103;
+}
+
 /* Container scroll wrapper for wide table layout */
 #results {
   width: 100%;
   overflow-x: auto;
   margin-top: 20px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   white-space: nowrap; /* Prevents cell content from wrapping awkwardly */
+  font-size: 13px;
 }
 
-th, td {
+/* Yellow Header Row */
+th {
+  background-color: #fbbc04;
+  color: #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 12px;
+  border: 1px solid #e0a800;
+  text-align: left;
+}
+
+td {
   padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  border-right: 1px solid #f0f0f0;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Emphasize Date and Time columns */
+.bold-col {
+  font-weight: bold;
 }
 
 /* Status Badges */
@@ -24,6 +111,7 @@ th, td {
   font-weight: bold;
   font-size: 0.85em;
   display: inline-block;
+  text-align: center;
 }
 
 .badge-upcoming {
@@ -36,6 +124,12 @@ th, td {
   background-color: #f1f3f4;
   color: #5f6368;
   border: 1px solid #dadce0;
+}
+
+/* Dim row style for finished lessons */
+.finished-row {
+  opacity: 0.65;
+  background-color: #f9f9f9 !important;
 }
 
 /* Button & Link Styles */
@@ -59,4 +153,14 @@ th, td {
   background-color: #dadce0;
   color: #70757a !important;
   cursor: not-allowed;
+}
+
+.raw-link {
+  color: #1a73e8;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
 }
