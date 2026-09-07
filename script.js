@@ -9,28 +9,114 @@ window.onload = function() {
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
 };
 
+// Confirmation modal for materials
 function confirmMaterial(url, materialName, timeStr, studentName, area) {
+  if (!url || url === '#' || url.trim() === '') return;
+
   Swal.fire({
     title: 'Material Check',
-    html: `You are going to use <b>"${materialName}"</b><br>for your <b>${timeStr}</b> lesson with <b>${studentName}</b> on <b>${area}</b>.<br><br><small style="color:#888">Material: ${materialName}</small>`,
+    html: `
+      <p style="font-size: 13px; margin-bottom: 8px; color: #1c1c1e; font-weight: 600;">
+        You are going to use <b>"${materialName}"</b><br>
+        for your <b>${timeStr}</b> lesson with <b>${studentName}</b> (${area}).
+      </p>
+      <div style="
+        background: #f2f2f7; 
+        padding: 8px; 
+        border-radius: 8px; 
+        word-break: break-all; 
+        font-family: monospace; 
+        font-size: 11px; 
+        color: #0056b3; 
+        border: 1px solid #c7c7cc;
+        text-align: left;
+        font-weight: 700;
+        margin-top: 10px;
+      ">
+        ${url}
+      </div>
+    `,
     icon: 'info',
     showCancelButton: true,
     confirmButtonColor: '#fbbc04',
-    confirmButtonText: '<span style="color:#000">OK, Open it</span>',
+    confirmButtonText: '<span style="color:#000; font-weight:700;">OK, Open it</span>',
     cancelButtonText: 'Cancel'
-  }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
+  }).then((result) => { 
+    if (result.isConfirmed) window.open(url, '_blank'); 
+  });
 }
 
+// Confirmation modal for meeting links (Zoom/Teams/Portals)
 function confirmMeeting(url, timeStr, studentName, area) {
+  if (!url || url === '#' || url.trim() === '') return;
+
   Swal.fire({
     title: 'Meeting Link Check',
-    html: `You are entering the meeting for your <b>${timeStr}</b> lesson<br>with <b>${studentName}</b> (${area}).<br><br><small style="color:#666"><b>Meeting URL:</b></small><span class="url-display">${url}</span>`,
+    html: `
+      <p style="font-size: 13px; margin-bottom: 8px; color: #1c1c1e; font-weight: 600;">
+        Please double check the destination URL before entering your <b>${timeStr}</b> lesson with <b>${studentName}</b> (${area}):
+      </p>
+      <div style="
+        background: #f2f2f7; 
+        padding: 10px; 
+        border-radius: 8px; 
+        word-break: break-all; 
+        font-family: monospace; 
+        font-size: 11px; 
+        color: #0056b3; 
+        border: 1px solid #c7c7cc;
+        text-align: left;
+        font-weight: 700;
+        margin-top: 10px;
+      ">
+        ${url}
+      </div>
+    `,
     icon: 'info',
     showCancelButton: true,
-    confirmButtonColor: '#1a73e8',
+    confirmButtonColor: '#34c759',
+    cancelButtonColor: '#8e8e93',
     confirmButtonText: 'Join Meeting',
     cancelButtonText: 'Cancel'
-  }).then((result) => { if (result.isConfirmed) window.open(url, '_blank'); });
+  }).then((result) => { 
+    if (result.isConfirmed) window.open(url, '_blank'); 
+  });
+}
+
+// Generic link confirmation for generic or raw links
+function confirmGenericLink(url, label) {
+  if (!url || url === '#' || url.trim() === '') return;
+
+  Swal.fire({
+    title: 'Link Check',
+    html: `
+      <p style="font-size: 13px; margin-bottom: 8px; color: #1c1c1e; font-weight: 600;">
+        Opening destination for <b>${label}</b>:
+      </p>
+      <div style="
+        background: #f2f2f7; 
+        padding: 8px; 
+        border-radius: 8px; 
+        word-break: break-all; 
+        font-family: monospace; 
+        font-size: 11px; 
+        color: #0056b3; 
+        border: 1px solid #c7c7cc;
+        text-align: left;
+        font-weight: 700;
+        margin-top: 10px;
+      ">
+        ${url}
+      </div>
+    `,
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonColor: '#007aff',
+    cancelButtonText: 'Cancel',
+    confirmButtonText: 'Proceed'
+  }).then((result) => { 
+    if (result.isConfirmed) window.open(url, '_blank'); 
+  });
 }
 
 // Helper to parse date text like "07/September(Mon)" into a JavaScript Date object
@@ -191,20 +277,20 @@ function render(rows) {
 
     // 2. Render remaining 17 data cells
     r.forEach((cell, i) => {
-      let content = cell || "-";
+      let content = String(cell || "-").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-      if (String(content).includes('http')) {
+      if (content.includes('http')) {
         if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 in data array)
-          html += `<td><a class="btn-link" href="${content}" target="_blank">Login Portal</a></td>`;
+          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Login Portal</button></td>`;
         } else if (i === 15) { // MATERIAL URL (Index 15 in data array)
           html += isFinished 
             ? `<td><span class="btn-link btn-disabled">Closed</span></td>` 
             : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Open</button></td>`;
         } else if (i === 16) { // FEEDBACK LINK (Index 16 in data array)
-          html += `<td><a class="btn-link" href="${content}" target="_blank">Open</a></td>`;
+          html += `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">Open</button></td>`;
         } else { 
-          html += `<td><a class="raw-link" href="${content}" target="_blank">Link</a></td>`; 
+          html += `<td><button class="raw-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Link</button></td>`; 
         }
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
