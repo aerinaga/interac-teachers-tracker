@@ -282,15 +282,16 @@ function render(rows) {
 
       if (content.includes('http')) {
         if (i === 13) { // TEACHER'S CLOUD LINK (Index 13 in data array)
-          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Login Portal</button></td>`;
+          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`;
         } else if (i === 15) { // MATERIAL URL (Index 15 in data array)
           html += isFinished 
-            ? `<td><span class="btn-link btn-disabled">Closed</span></td>` 
-            : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Open</button></td>`;
+            ? `<td><span class="btn-link btn-disabled">CLOSED</span></td>` 
+            : `<td><button class="btn-link" onclick="confirmMaterial('${content}', '${r[14]}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`;
         } else if (i === 16) { // FEEDBACK LINK (Index 16 in data array)
-          html += `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">Open</button></td>`;
+          html += `<td><button class="btn-link" onclick="confirmGenericLink('${content}', 'Feedback Link')">OPEN</button></td>`;
         } else { 
-          html += `<td><button class="raw-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">Link</button></td>`; 
+          // Replaced 'raw-link' link with styled blue 'btn-link' button
+          html += `<td><button class="btn-link" onclick="confirmMeeting('${content}', '${fullTimeStr}', '${r[9]}', '${r[5]}')">OPEN</button></td>`; 
         }
       } else { 
         html += `<td ${boldClass}>${content}</td>`; 
