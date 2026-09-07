@@ -1,8 +1,11 @@
-/* Base Layout & Fonts */
+/* Base Layout & iOS Native Typography */
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: #ffffff;
-  color: #333333;
+  color: #1c1c1e; /* Darker, crisp iOS text color */
+  font-weight: 500; /* Thicker base weight (Medium) */
   margin: 0;
   padding: 20px 10px;
 }
@@ -15,17 +18,18 @@ body {
 }
 
 .search-container h2 {
-  color: #1a73e8; /* Bold Blue Title */
+  color: #007aff; /* iOS System Blue */
   font-size: 26px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-weight: 800; /* Extra bold title */
+  letter-spacing: -0.5px; /* iOS style tight tracking */
   margin: 0 0 6px 0;
   text-transform: uppercase;
 }
 
 #date-range-note {
-  font-size: 13px;
-  color: #555555;
+  font-size: 14px;
+  font-weight: 600; /* Semi-bold note */
+  color: #3a3a3c;
   margin-bottom: 20px;
 }
 
@@ -40,33 +44,35 @@ body {
 
 .search-box input[type="text"] {
   width: 280px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid #c7c7cc; /* iOS border gray */
+  border-radius: 8px; /* Slightly smoother iOS corner radius */
+  font-size: 15px;
+  font-weight: 500;
   outline: none;
 }
 
 .search-box button {
-  padding: 8px 24px;
-  background-color: #1a73e8; /* Bright Blue Search Button */
+  padding: 10px 24px;
+  background-color: #007aff; /* iOS System Blue */
   color: #ffffff;
-  font-weight: bold;
+  font-weight: 700; /* Bold button text */
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
 }
 
 .search-box button:hover {
-  background-color: #1557b0;
+  background-color: #0062cc;
 }
 
 .search-container small {
   display: block;
-  font-size: 12px;
-  color: #777777;
-  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8e8e93;
+  margin-top: 8px;
 }
 
 /* Table Scroll Wrapper */
@@ -81,94 +87,99 @@ table {
   width: 100%;
   border-collapse: collapse;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500; /* Thicker table cell text */
 }
 
 /* Golden Yellow Table Headers */
 th {
   background-color: #f1c232;
   color: #000000;
-  font-weight: bold;
-  font-size: 11px;
+  font-weight: 800; /* Extra bold headers */
+  font-size: 12px;
   text-transform: uppercase;
-  padding: 10px 8px;
+  padding: 12px 10px;
   border: 1px solid #d9a712;
   text-align: center;
+  letter-spacing: 0.3px;
 }
 
 /* Table Cells */
 td {
-  padding: 8px 10px;
+  padding: 10px 12px;
   text-align: center;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #f0f0f0;
-  color: #333333;
+  border-bottom: 1px solid #e5e5ea;
+  border-right: 1px solid #f2f2f7;
+  color: #1c1c1e;
+  font-weight: 600; /* Medium-bold for overall readability */
 }
 
 tr:hover {
-  background-color: #f9f9f9;
+  background-color: #f2f2f7;
 }
 
 /* Bold Columns (Date & Times) */
 .bold-col {
-  font-weight: bold;
+  font-weight: 800; /* Extra bold date and time */
 }
 
 /* Pill Badges (STATUS) */
 .badge {
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 10px;
-  font-weight: bold;
+  font-size: 11px;
+  font-weight: 800;
   display: inline-block;
+  letter-spacing: 0.3px;
 }
 
 .badge-upcoming {
-  background-color: #e6f4ea;
-  color: #137333;
-  border: 1px solid #ceead6;
+  background-color: #e4f9e8;
+  color: #248a3d; /* iOS System Green */
+  border: 1px solid #34c759;
 }
 
 .badge-finished {
-  background-color: #f1f3f4;
-  color: #5f6368;
-  border: 1px solid #dadce0;
+  background-color: #f2f2f7;
+  color: #8e8e93;
+  border: 1px solid #c7c7cc;
 }
 
 /* Finished Row Dimming */
 .finished-row {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
-/* Blue Action Buttons ("OPEN") */
+/* Action Buttons ("OPEN") */
 .btn-link {
   display: inline-block;
-  padding: 4px 16px;
-  background-color: #1a73e8;
+  padding: 5px 16px;
+  background-color: #007aff;
   color: #ffffff !important;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 6px;
   border: none;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
 .btn-link:hover {
-  background-color: #1557b0;
+  background-color: #0062cc;
 }
 
 .btn-disabled {
-  background-color: #dadce0;
-  color: #70757a !important;
+  background-color: #e5e5ea;
+  color: #8e8e93 !important;
   cursor: not-allowed;
 }
 
 /* Text Link ("Link") */
 .raw-link {
-  color: #1a73e8;
+  color: #007aff;
+  font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
 }
