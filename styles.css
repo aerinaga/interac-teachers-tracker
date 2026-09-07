@@ -100,14 +100,14 @@ body {
   margin-top: 6px;
 }
 
-/* Upper Right Note Container */
+/* Upper Right Note Container (Tightly Packed) */
 .backup-note-container {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 15px;
-  padding-right: 12px;
+  gap: 4px; /* Reduced gap to pull finger closer to text */
+  margin-top: -10px; /* Moves entire section slightly up */
+  padding-right: 8px;
   position: relative;
   z-index: 2;
 }
@@ -119,22 +119,20 @@ body {
   font-weight: 700;
   color: #d70015;
   margin: 0;
+  line-height: 1.2;
 }
 
-/* Tightly Cropped & Zoomed Character Image */
+/* Character Image - Positioned right at text tip */
 .backup-pointer-img {
-  width: 220px;            /* Expanded width */
-  height: 120px;           /* Tight height creates landscape crop */
-  object-fit: cover;       /* Zooms in and strips away outer black space */
-  object-position: center 25%; /* Keeps focus on head, body, and pointing hand */
+  width: 190px;
+  height: 120px;
+  object-fit: cover;
+  object-position: center 25%;
   border-radius: 8px;
-  transform: scaleX(-1);   /* Flips horizontally to point left at text */
+  transform: scaleX(-1);
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.25));
-  transition: transform 0.2s ease-in-out;
-}
-
-.backup-pointer-img:hover {
-  transform: scaleX(-1) scale(1.05);
+  margin-left: -15px; /* Pulls her hand directly onto/next to the text */
+  margin-top: 18px;   /* Vertically aligns finger tip with text line */
 }
 
 /* Darker Glass Results Table Card */
@@ -175,7 +173,7 @@ th {
   line-height: 1.1;
 }
 
-/* Table Cells with Darker Text */
+/* Table Cells */
 td {
   padding: 6px 4px;
   text-align: center;
@@ -194,13 +192,11 @@ tr:hover {
   font-weight: 800;
 }
 
-/* Gray Tint for Entire Finished Rows */
 .finished-row {
   background-color: rgba(140, 145, 155, 0.35);
   color: #2c2c2e;
 }
 
-/* Status Badges */
 .badge {
   padding: 3px 6px;
   border-radius: 10px;
@@ -215,14 +211,12 @@ tr:hover {
   border: 1px solid #34c759;
 }
 
-/* Red Finished Badge */
 .badge-finished {
   background-color: #ffe5e5;
   color: #d70015;
   border: 1px solid #ff3b30;
 }
 
-/* Action Buttons */
 .btn-link {
   display: inline-block;
   padding: 3px 8px;
@@ -245,36 +239,4 @@ tr:hover {
   border-radius: 5px;
   font-size: 10px;
   font-weight: 700;
-}
-
-.raw-link {
-  color: #0056b3;
-  font-weight: 800;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 11px;
-}
-
-/* SweetAlert Modal Custom Styles */
-.swal2-popup {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-}
-
-.swal2-title {
-  font-size: 18px !important;
-  font-weight: 800 !important;
-  color: #1c1c1e !important;
-}
-
-.swal2-styled.swal2-confirm {
-  font-weight: 700 !important;
-  border-radius: 8px !important;
-}
-
-.swal2-styled.swal2-cancel {
-  font-weight: 700 !important;
-  border-radius: 8px !important;
 }
