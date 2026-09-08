@@ -347,13 +347,13 @@ function render(rows) {
         } else {
           html += `<td>No Feedback</td>`;
         }
-      } else if (i === 17) { // URL LINK (Col Q)
+      } else if (i === 17) { // MEETING LINK (Col Q)
         if (content.startsWith('http')) {
           const btnId = `urllink-btn-${rowIndex}`;
           html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
           setTimeout(() => {
             const btn = document.getElementById(btnId);
-            if (btn) btn.onclick = () => confirmGenericLink(content, 'URL Link');
+            if (btn) btn.onclick = () => confirmGenericLink(content, 'Meeting Link');
           }, 0);
         } else {
           html += `<td>-</td>`;
