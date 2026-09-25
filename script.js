@@ -2,19 +2,19 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// ADD ALL YOUR MP3 FILENAMES HERE
+// ADD ALL YOUR MP3 FILENAMES HERE (Standard plain text filenames)
 const playlistFiles = [
-  "Yel%20-%20GHOST.mp3",
-  "BROCKHAMPTON%20-%20SUMMER.mp3",
-  "BROCKHAMPTON%20-%20WASTE.mp3",
-  "Dijon%20-%20The%20Dress.mp3",
-  "Lauv%20-%20Never%20Not.mp3",
-  "MAX%2C%20HUH%20YUNJIN%20-%20STUPID%20IN%20LOVE.mp3",
-  "MAX%2C%20keshi%20-%20IT%27S%20YOU%20%28feat.%20keshi%29.mp3",
-  "Mk.gee%20-%20I%20Want.mp3",
-  "RIIZE%20-%20Love%20119.mp3",
-  "XG%20-%20LEFT%20RIGHT.mp3",
-  "Yel%20-%20About%20Last%20Night...mp3",
+  "BROCKHAMPTON - SUMMER.mp3",
+  "BROCKHAMPTON - WASTE.mp3",
+  "Dijon - The Dress.mp3",
+  "Lauv - Never Not.mp3",
+  "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
+  "MAX, keshi - IT'S YOU (feat. keshi).mp3",
+  "Mk.gee - I Want.mp3",
+  "RIIZE - Love 119.mp3",
+  "XG - LEFT RIGHT.mp3",
+  "Yel - About Last Night...mp3",
+  "Yel - GHOST.mp3"
 ];
 
 // Fallback image if MP3 has no embedded album cover art
@@ -28,7 +28,7 @@ window.onload = function() {
   future.setDate(today.getDate() + 14);
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
   
-  // Load playlist and extract MP3 metadata
+  // Load playlist immediately from file names so UI never gets stuck
   initAudioPlaylist();
 };
 
@@ -41,70 +41,83 @@ function initAudioPlaylist() {
   selectElem.innerHTML = "";
   trackMetadataCache = [];
 
-  let loadedCount = 0;
+  playlistFiles.forEach((file, index) => {
+    // Parse "Artist - Title.mp3" from filename automatically as instant fallback
+    const cleanFileName = decodeURIComponent(file).replace(/\.mp3$/i, '');
+    const parts = cleanFileName.split(' - ');
+    
+    let defaultArtist = "Unknown Artist";
+    let defaultTitle = cleanFileName;
 
-  playlistFiles.forEach((fileUrl, index) => {
-    // Default fallback object
+    if (parts.length >= 2) {
+      defaultArtist = parts[0].trim();
+      defaultTitle = parts.slice(1).join(' - ').trim();
+    }
+
     const trackInfo = {
       index: index,
-      url: fileUrl,
-      title: decodeURIComponent(fileUrl).replace(/\.mp3$/i, ''),
-      artist: "Unknown Artist",
-      album: "Unknown Album",
-      coverUrl: DEFAULT_COVER
+      url: encodeURIComponent(file).replace(/%2F/g, '/'),
+      title: defaultTitle,
+      artist: defaultArtist,
+      album: "Audio Track",
+      coverUrl: DEFAULT_COVER,
+      tagsLoaded: false
     };
 
     trackMetadataCache[index] = trackInfo;
 
-    // Read ID3 metadata using jsmediatags
-    if (window.jsmediatags) {
-      window.jsmediatags.read(fileUrl, {
-        onSuccess: function(tag) {
-          const tags = tag.tags;
-          if (tags.title) trackInfo.title = tags.title;
-          if (tags.artist) trackInfo.artist = tags.artist;
-          if (tags.album) trackInfo.album = tags.album;
-
-          // Extract embedded album cover art image data
-          if (tags.picture) {
-            const picture = tags.picture;
-            let base64String = "";
-            for (let i = 0; i < picture.data.length; i++) {
-              base64String += String.fromCharCode(picture.data[i]);
-            }
-            const base64 = "data:" + picture.format + ";base64," + window.btoa(base64String);
-            trackInfo.coverUrl = base64;
-          }
-
-          updateTrackOptionUI(index);
-          loadedCount++;
-          if (index === 0) loadTrackIntoUI(0);
-        },
-        onError: function(error) {
-          console.warn("Could not read ID3 metadata for:", fileUrl, error);
-          updateTrackOptionUI(index);
-          loadedCount++;
-          if (index === 0) loadTrackIntoUI(0);
-        }
-      });
-    } else {
-      updateTrackOptionUI(index);
-      if (index === 0) loadTrackIntoUI(0);
-    }
+    const opt = document.createElement('option');
+    opt.value = index;
+    opt.text = trackInfo.title;
+    selectElem.appendChild(opt);
   });
+
+  // Display first track instantly
+  if (trackMetadataCache.length > 0) {
+    loadTrackIntoUI(0, false);
+  }
 }
 
-function updateTrackOptionUI(index) {
-  const selectElem = document.getElementById('audio-track-select');
+function fetchID3Tags(index) {
   const info = trackMetadataCache[index];
-  
-  let opt = selectElem.options[index];
-  if (!opt) {
-    opt = document.createElement('option');
-    opt.value = index;
-    selectElem.appendChild(opt);
-  }
-  opt.text = info.title;
+  if (!info || info.tagsLoaded || !window.jsmediatags) return;
+
+  window.jsmediatags.read(info.url, {
+    onSuccess: function(tag) {
+      const tags = tag.tags;
+      if (tags.title) info.title = tags.title;
+      if (tags.artist) info.artist = tags.artist;
+      if (tags.album) info.album = tags.album;
+
+      if (tags.picture) {
+        const picture = tags.picture;
+        let base64String = "";
+        for (let i = 0; i < picture.data.length; i++) {
+          base64String += String.fromCharCode(picture.data[i]);
+        }
+        info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
+      }
+
+      info.tagsLoaded = true;
+
+      // Re-render UI if this track is currently active
+      const selectElem = document.getElementById('audio-track-select');
+      if (selectElem && parseInt(selectElem.value, 10) === index) {
+        document.getElementById('track-title').innerText = info.title;
+        document.getElementById('track-artist').innerText = info.artist;
+        document.getElementById('track-album').innerText = info.album;
+        document.getElementById('album-art').src = info.coverUrl;
+        
+        if (selectElem.options[index]) {
+          selectElem.options[index].text = info.title;
+        }
+      }
+    },
+    onError: function(error) {
+      console.warn("Could not parse ID3 tags for:", info.url, error);
+      info.tagsLoaded = true; // prevent retrying continuously
+    }
+  });
 }
 
 function loadTrackIntoUI(index, autoPlay = false) {
@@ -120,8 +133,11 @@ function loadTrackIntoUI(index, autoPlay = false) {
   document.getElementById('track-album').innerText = info.album;
   document.getElementById('album-art').src = info.coverUrl;
 
-  selectElem.selectedIndex = index;
+  selectElem.value = index;
   player.src = info.url;
+
+  // Fetch ID3 Tags in background for current playing track
+  fetchID3Tags(index);
 
   if (autoPlay) {
     player.play();
@@ -135,7 +151,7 @@ function toggleAudioPlay() {
   const selectElem = document.getElementById('audio-track-select');
 
   if (!player.src || player.src === "" || player.src.endsWith('/')) {
-    loadTrackIntoUI(selectElem.selectedIndex || 0);
+    loadTrackIntoUI(selectElem.value || 0);
   }
 
   if (player.paused) {
@@ -160,7 +176,7 @@ function setAudioVolume(val) {
   player.volume = val;
 }
 
-// Automatically play the next song when finished, and stop at the end of the playlist
+// Play next song automatically on end, stop at end of playlist
 document.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('main-audio-player');
   const selectElem = document.getElementById('audio-track-select');
@@ -168,12 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (player) {
     player.addEventListener('ended', () => {
-      let nextIndex = selectElem.selectedIndex + 1;
+      let nextIndex = parseInt(selectElem.value, 10) + 1;
 
       if (nextIndex < playlistFiles.length) {
         loadTrackIntoUI(nextIndex, true);
       } else {
-        // Stop playback at end of playlist
         if (playBtn) playBtn.innerText = '▶';
       }
     });
