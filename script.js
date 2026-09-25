@@ -6,62 +6,63 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
 // --- PLAYLIST CONFIGURATION ---
+// Using reliable open-access CDN image links for album covers
 const playlistData = [
   {
     file: "BROCKHAMPTON - SUMMER.mp3",
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/23/Saturation_II.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/bf/12/f2/bf12f279-d102-1219-c128-44bd78cb7ad9/191773822180.jpg/600x600bb.jpg"
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/2e/Brockhampton_-_Saturation.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg"
   },
   {
     file: "Dijon - The Dress.mp3",
     title: "The Dress",
     artist: "Dijon",
     album: "Absolutely",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/e0/Dijon_-_Absolutely.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4a/1b/9d/4a1b9d4e-b83c-15ba-87a4-a9578dd35f52/054391942074.jpg/600x600bb.jpg"
   },
   {
     file: "Lauv - Never Not.mp3",
     title: "Never Not",
     artist: "Lauv",
     album: "I met you when I was 18.",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/e8/I_Met_You_When_I_Was_18_%28The_Playlist%29.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e0/f8/f3/e0f8f30d-271d-5a9a-7622-6b957e849ea2/191773950227.jpg/600x600bb.jpg"
   },
   {
     file: "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
     title: "STUPID IN LOVE",
     artist: "MAX, HUH YUNJIN",
     album: "LOVE IN STEREO",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dd/MAX_-_Love_in_Stereo.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/c2/79/f9/c279f911-3837-1d6f-7067-175a02e621f8/5054197945033.jpg/600x600bb.jpg"
   },
   {
     file: "MAX, keshi - IT'S YOU (feat. keshi).mp3",
     title: "IT'S YOU (feat. keshi)",
     artist: "MAX, keshi",
     album: "LOVE IN STEREO",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dd/MAX_-_Love_in_Stereo.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/c2/79/f9/c279f911-3837-1d6f-7067-175a02e621f8/5054197945033.jpg/600x600bb.jpg"
   },
   {
     file: "Mk.gee - I Want.mp3",
     title: "I Want",
     artist: "Mk.gee",
     album: "Two Star & The Dream Police",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/0/03/Mk.gee_-_Two_Star_%26_the_Dream_Police.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4e/d8/56/4ed856b3-96cb-8457-30e7-9d76c9efbc99/5054197920801.jpg/600x600bb.jpg"
   },
   {
     file: "RIIZE - Love 119.mp3",
     title: "Love 119",
     artist: "RIIZE",
     album: "Love 119 - Single",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/0/0d/RIIZE_-_Love_119.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/66/be/e0/64bee0fa-5a8a-e991-b3b3-294b63ff5cb2/198391307137.jpg/600x600bb.jpg"
   },
   {
     file: "starfall - intentions.mp3",
@@ -75,21 +76,21 @@ const playlistData = [
     title: "LEFT RIGHT",
     artist: "XG",
     album: "SHOOTING STAR",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/5/53/XG_-_Shooting_Star.jpg"
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/e6/5d/21/e65d210d-2b47-66a9-4b62-11ef8d70bdce/197188177579.jpg/600x600bb.jpg"
   },
   {
     file: "Yel - About Last Night...mp3",
     title: "About Last Night...",
     artist: "Yel",
     album: "About Last Night...",
-    coverUrl: "https://i1.sndcdn.com/artworks-HWW85x3i1bOq-0-t500x500.jpg"
+    coverUrl: "https://i.scdn.co/image/ab67616d0000b27393d258dd61f0efcb6c9a3d46"
   },
   {
     file: "Yel - GHOST.mp3",
     title: "GHOST",
     artist: "Yel",
     album: "GHOST",
-    coverUrl: "https://i1.sndcdn.com/artworks-mAnJbUv2O1oH-0-t500x500.jpg"
+    coverUrl: "https://i.scdn.co/image/ab67616d0000b273efbc6b8bf5bc73a118e69d7b"
   }
 ];
 
@@ -99,7 +100,11 @@ window.onload = function() {
   const today = new Date();
   const future = new Date();
   future.setDate(today.getDate() + 14);
-  document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+  
+  const noteElem = document.getElementById('date-range-note');
+  if (noteElem) {
+    noteElem.innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+  }
   
   initAudioPlaylist();
 };
@@ -120,7 +125,7 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      coverUrl: track.coverUrl,
+      coverUrl: track.coverUrl || DEFAULT_COVER,
       tagsLoaded: false
     };
 
@@ -137,49 +142,9 @@ function initAudioPlaylist() {
   }
 }
 
-// Extract ID3 metadata or fetch dynamically from online APIs
-function fetchEmbeddedID3Tags(index) {
-  const info = trackMetadataCache[index];
-  if (!info || info.tagsLoaded) return;
-
-  if (window.jsmediatags) {
-    window.jsmediatags.read(info.url, {
-      onSuccess: function(tag) {
-        const tags = tag.tags;
-        if (tags.title) info.title = tags.title;
-        if (tags.artist) info.artist = tags.artist;
-        if (tags.album) info.album = tags.album;
-
-        if (tags.picture) {
-          const picture = tags.picture;
-          let base64String = "";
-          for (let i = 0; i < picture.data.length; i++) {
-            base64String += String.fromCharCode(picture.data[i]);
-          }
-          info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
-        }
-
-        info.tagsLoaded = true;
-        updateTrackUIIfActive(index);
-      },
-      onError: function() {
-        fetchMetadataFromAPI(index);
-      }
-    });
-  } else {
-    fetchMetadataFromAPI(index);
-  }
-}
-
 function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
-
-  // If coverUrl is set and valid, no API lookup needed
-  if (info.coverUrl && info.coverUrl !== DEFAULT_COVER) {
-    info.tagsLoaded = true;
-    return;
-  }
 
   const query = encodeURIComponent(`${info.artist} ${info.title}`);
   fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`)
@@ -191,8 +156,6 @@ function fetchMetadataFromAPI(index) {
           info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
         }
         if (result.collectionName) info.album = result.collectionName;
-        if (result.trackName) info.title = result.trackName;
-        if (result.artistName) info.artist = result.artistName;
       }
       info.tagsLoaded = true;
       updateTrackUIIfActive(index);
@@ -209,7 +172,10 @@ function updateTrackUIIfActive(index) {
     document.getElementById('track-title').innerText = info.title;
     document.getElementById('track-artist').innerText = info.artist;
     document.getElementById('track-album').innerText = info.album;
-    document.getElementById('album-art').src = info.coverUrl;
+    
+    const imgElem = document.getElementById('album-art');
+    imgElem.referrerPolicy = "no-referrer";
+    imgElem.src = info.coverUrl;
   }
 }
 
@@ -226,15 +192,22 @@ function loadTrackIntoUI(index, autoPlay = false) {
   document.getElementById('track-album').innerText = info.album;
   
   const imgElem = document.getElementById('album-art');
+  
+  // Set referrerPolicy to bypass cross-domain image blocking
+  imgElem.referrerPolicy = "no-referrer";
+  
+  // Fallback handler if image URL fails to load
   imgElem.onerror = function() {
+    console.warn(`Cover URL failed for track ${index}, fetching API fallback...`);
+    this.onerror = null; // Prevent loop
     this.src = DEFAULT_COVER;
+    fetchMetadataFromAPI(index);
   };
+  
   imgElem.src = info.coverUrl;
 
   selectElem.value = index;
   player.src = info.url;
-
-  fetchEmbeddedID3Tags(index);
 
   if (autoPlay) {
     player.play().then(() => {
@@ -274,7 +247,6 @@ function setAudioVolume(val) {
   player.volume = val;
 }
 
-// Auto-play next track when song finishes
 document.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('main-audio-player');
   const selectElem = document.getElementById('audio-track-select');
