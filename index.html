@@ -10,6 +10,9 @@
   
   <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- jsmediatags CDN to read MP3 ID3 Tags & Album Art dynamically -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 </head>
 <body>
 
@@ -21,26 +24,23 @@
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Mini Square Audio Player Widget (Positioned Top Right) -->
+      <!-- Mini Square Audio Player Widget -->
       <div class="audio-player-card">
         <div class="album-art-wrapper">
           <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
         </div>
         
         <div class="player-info">
-          <span id="track-title" class="track-title">GHOST</span>
-          <span id="track-album" class="track-album">Yel</span>
+          <span id="track-title" class="track-title">Loading...</span>
+          <span id="track-artist" class="track-artist">Artist</span>
+          <span id="track-album" class="track-album">Album</span>
         </div>
 
         <div class="player-controls">
           <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
           
-          <select id="audio-track-select" class="track-select" onchange="changeAudioTrack(this)">
-            <!-- Track 1 -->
-            <option value="Yel%20-%20GHOST.mp3" data-title="GHOST" data-album="Yel" data-cover="JP%20Logo.png">GHOST</option>
-            
-            <!-- ADD MORE MP3 TRACKS BELOW LIKE THIS: -->
-            <!-- <option value="song2.mp3" data-title="Track Title" data-album="Album Name" data-cover="cover2.png">Song Name</option> -->
+          <select id="audio-track-select" class="track-select" onchange="onTrackSelectChange(this)">
+            <!-- Populated dynamically from script.js playlist array -->
           </select>
         </div>
 
@@ -49,7 +49,7 @@
           <input type="range" id="audio-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setAudioVolume(this.value)">
         </div>
 
-        <audio id="main-audio-player" src="Yel%20-%20GHOST.mp3" preload="none"></audio>
+        <audio id="main-audio-player" preload="none"></audio>
       </div>
 
       <div class="search-box">
@@ -89,7 +89,7 @@
     <div id="results"></div>
   </div>
 
-  <!-- Clean Minimalist Footer Pushed All the Way Down -->
+  <!-- Clean Minimalist Footer -->
   <footer class="site-footer">
     <p>© 2026 appleofyves_ • All Rights Reserved</p>
   </footer>
