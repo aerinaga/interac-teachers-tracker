@@ -21,6 +21,37 @@
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
+      <!-- Mini Square Audio Player Widget (Positioned Top Right) -->
+      <div class="audio-player-card">
+        <div class="album-art-wrapper">
+          <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
+        </div>
+        
+        <div class="player-info">
+          <span id="track-title" class="track-title">GHOST</span>
+          <span id="track-album" class="track-album">Yel</span>
+        </div>
+
+        <div class="player-controls">
+          <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
+          
+          <select id="audio-track-select" class="track-select" onchange="changeAudioTrack(this)">
+            <!-- Track 1 -->
+            <option value="Yel%20-%20GHOST.mp3" data-title="GHOST" data-album="Yel" data-cover="JP%20Logo.png">GHOST</option>
+            
+            <!-- ADD MORE MP3 TRACKS BELOW LIKE THIS: -->
+            <!-- <option value="song2.mp3" data-title="Track Title" data-album="Album Name" data-cover="cover2.png">Song Name</option> -->
+          </select>
+        </div>
+
+        <div class="audio-volume-wrapper">
+          <span class="volume-icon">🔊</span>
+          <input type="range" id="audio-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setAudioVolume(this.value)">
+        </div>
+
+        <audio id="main-audio-player" src="Yel%20-%20GHOST.mp3" preload="none"></audio>
+      </div>
+
       <div class="search-box">
         <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)" onkeydown="if(event.key === 'Enter') doSearch()">
         <button onclick="doSearch()">Search</button>
@@ -41,30 +72,6 @@
           <p>The meeting link will only appear around <strong>10 - 5 minutes before</strong> the lesson time.</p>
           <p style="margin-top: 6px;">Don't panic if the meeting link is still not at your cloud!!</p>
         </div>
-      </div>
-
-      <!-- Top Audio Bar Widget -->
-      <div class="audio-bar-container">
-        <div class="audio-track-info">
-          <span class="audio-icon">🎵</span>
-          <div class="track-details">
-            <span id="track-title" class="track-title">Yel - GHOST</span>
-            <span id="track-artist" class="track-artist">Background Music</span>
-          </div>
-        </div>
-
-        <div class="audio-controls">
-          <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
-          <select id="audio-track-select" class="track-select" onchange="changeAudioTrack(this.value)">
-            <option value="Yel%20-%20GHOST.mp3">Yel - GHOST</option>
-          </select>
-          <div class="audio-volume-wrapper">
-            <span class="volume-icon">🔊</span>
-            <input type="range" id="audio-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setAudioVolume(this.value)">
-          </div>
-        </div>
-
-        <audio id="main-audio-player" src="Yel%20-%20GHOST.mp3" preload="none"></audio>
       </div>
 
       <!-- Two-Line Separated Backup Notice -->
