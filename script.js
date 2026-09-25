@@ -5,26 +5,8 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 // SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
-// Direct, reliable artwork links for SATURATION II and SATURATION
-const SATURATION_2_COVER = "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bf/25/11/bf2511cd-062e-a3b0-6d47-680c2f829f7f/191773663073.jpg/600x600bb.jpg";
-const SATURATION_1_COVER = "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg";
-
-// --- PLAYLIST CONFIGURATION ---
+// --- PLAYLIST CONFIGURATION (BROCKHAMPTON REMOVED) ---
 const playlistData = [
-  {
-    file: "BROCKHAMPTON - SUMMER.mp3",
-    title: "SUMMER",
-    artist: "BROCKHAMPTON",
-    album: "SATURATION II",
-    coverUrl: SATURATION_2_COVER
-  },
-  {
-    file: "BROCKHAMPTON - WASTE.mp3",
-    title: "WASTE",
-    artist: "BROCKHAMPTON",
-    album: "SATURATION",
-    coverUrl: SATURATION_1_COVER
-  },
   {
     file: "Dijon - The Dress.mp3",
     title: "The Dress",
@@ -128,7 +110,6 @@ function initAudioPlaylist() {
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
 
-    // Only query API if coverUrl is missing
     if (!track.coverUrl) {
       fetchMetadataFromAPI(index);
     }
