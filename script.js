@@ -11,13 +11,15 @@ const playlistData = [
     file: "BROCKHAMPTON - SUMMER.mp3",
     title: "SUMMER",
     artist: "BROCKHAMPTON",
-    album: "SATURATION II"
+    album: "SATURATION II",
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/bf/25/11/bf2511cd-062e-a3b0-6d47-680c2f829f7f/191773663073.jpg/600x600bb.jpg"
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
-    album: "SATURATION"
+    album: "SATURATION",
+    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg"
   },
   {
     file: "Dijon - The Dress.mp3",
@@ -112,7 +114,7 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      coverUrl: DEFAULT_COVER
+      coverUrl: track.coverUrl || DEFAULT_COVER
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -122,8 +124,10 @@ function initAudioPlaylist() {
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
 
-    // Pre-fetch album art metadata immediately on load
-    fetchMetadataFromAPI(index);
+    // Fetch API metadata only for songs that don't have a explicit coverUrl set
+    if (!track.coverUrl) {
+      fetchMetadataFromAPI(index);
+    }
   });
 
   if (trackMetadataCache.length > 0) {
@@ -135,17 +139,8 @@ function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  let queryUrl = "";
-
-  if (info.artist === "BROCKHAMPTON") {
-    // For BROCKHAMPTON, search album entity using artist + album title
-    const term = encodeURIComponent(`${info.artist} ${info.album}`);
-    queryUrl = `https://itunes.apple.com/search?term=${term}&entity=album&limit=1`;
-  } else {
-    // Standard song search for all other tracks
-    const term = encodeURIComponent(`${info.artist} ${info.title}`);
-    queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
-  }
+  const term = encodeURIComponent(`${info.artist} ${info.title}`);
+  const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
   fetch(queryUrl)
     .then(res => res.json())
@@ -155,7 +150,7 @@ function fetchMetadataFromAPI(index) {
         if (result.artworkUrl100) {
           info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
         }
-        if (result.collectionName && info.artist !== "BROCKHAMPTON") {
+        if (result.collectionName) {
           info.album = result.collectionName;
         }
       }
