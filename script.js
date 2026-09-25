@@ -124,7 +124,7 @@ function initAudioPlaylist() {
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
 
-    // Fetch API metadata only for songs that don't have a explicit coverUrl set
+    // Fetch API metadata only for songs that don't have an explicit coverUrl set
     if (!track.coverUrl) {
       fetchMetadataFromAPI(index);
     }
@@ -170,8 +170,10 @@ function updateTrackUIIfActive(index) {
     document.getElementById('track-album').innerText = info.album;
     
     const imgElem = document.getElementById('album-art');
-    imgElem.referrerPolicy = "no-referrer";
-    imgElem.src = info.coverUrl;
+    if (imgElem) {
+      imgElem.referrerPolicy = "no-referrer";
+      imgElem.src = info.coverUrl || DEFAULT_COVER;
+    }
   }
 }
 
@@ -188,14 +190,16 @@ function loadTrackIntoUI(index, autoPlay = false) {
   document.getElementById('track-album').innerText = info.album;
   
   const imgElem = document.getElementById('album-art');
-  imgElem.referrerPolicy = "no-referrer";
-  
-  imgElem.onerror = function() {
-    this.onerror = null;
-    this.src = DEFAULT_COVER;
-  };
-  
-  imgElem.src = info.coverUrl;
+  if (imgElem) {
+    imgElem.referrerPolicy = "no-referrer";
+    
+    imgElem.onerror = function() {
+      this.onerror = null;
+      this.src = DEFAULT_COVER;
+    };
+    
+    imgElem.src = info.coverUrl && info.coverUrl !== DEFAULT_COVER ? info.coverUrl : DEFAULT_COVER;
+  }
 
   selectElem.value = index;
   player.src = info.url;
