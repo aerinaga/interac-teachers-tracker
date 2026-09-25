@@ -12,14 +12,14 @@ const playlistData = [
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/bf/25/11/bf2511cd-062e-a3b0-6d47-680c2f829f7f/191773663073.jpg/600x600bb.jpg"
+    appleMusicUrl: "https://music.apple.com/nz/song/summer/1273819144"
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg"
+    appleMusicUrl: "https://music.apple.com/us/song/waste/1245319885"
   },
   {
     file: "Dijon - The Dress.mp3",
@@ -114,7 +114,8 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      coverUrl: track.coverUrl || DEFAULT_COVER
+      appleMusicUrl: track.appleMusicUrl || null,
+      coverUrl: DEFAULT_COVER
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -124,8 +125,10 @@ function initAudioPlaylist() {
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
 
-    // Fetch API metadata only for songs that don't have an explicit coverUrl set
-    if (!track.coverUrl) {
+    // Fetch artwork directly from Apple Music page link if provided
+    if (track.appleMusicUrl) {
+      fetchAppleMusicArt(index, track.appleMusicUrl);
+    } else {
       fetchMetadataFromAPI(index);
     }
   });
@@ -133,6 +136,37 @@ function initAudioPlaylist() {
   if (trackMetadataCache.length > 0) {
     loadTrackIntoUI(0, false);
   }
+}
+
+function fetchAppleMusicArt(index, appleUrl) {
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(appleUrl)}`;
+
+  fetch(proxyUrl)
+    .then(res => {
+      if (!res.ok) throw new Error("Proxy error");
+      return res.json();
+    })
+    .then(data => {
+      if (data && data.contents) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        
+        // Find open graph meta image tag
+        const metaImg = doc.querySelector('meta[property="og:image"]') || doc.querySelector('meta[name="twitter:image"]');
+        if (metaImg && metaImg.content) {
+          let artUrl = metaImg.content;
+          // Scale image resolution to 600x600
+          artUrl = artUrl.replace(/\/\d+x\d+bb/g, '/600x600bb').replace(/\/\d+x\d+cw/g, '/600x600bb');
+          trackMetadataCache[index].coverUrl = artUrl;
+          updateTrackUIIfActive(index);
+        }
+      }
+    })
+    .catch(err => {
+      console.warn("Failed to scrape Apple Music artwork for index", index, err);
+      // Fallback to iTunes Search API if scraping fails
+      fetchMetadataFromAPI(index);
+    });
 }
 
 function fetchMetadataFromAPI(index) {
@@ -198,7 +232,7 @@ function loadTrackIntoUI(index, autoPlay = false) {
       this.src = DEFAULT_COVER;
     };
     
-    imgElem.src = info.coverUrl && info.coverUrl !== DEFAULT_COVER ? info.coverUrl : DEFAULT_COVER;
+    imgElem.src = info.coverUrl || DEFAULT_COVER;
   }
 
   selectElem.value = index;
