@@ -393,17 +393,26 @@ function toggleAudioPlay() {
   }
 }
 
-function changeAudioTrack(url) {
+function changeAudioTrack(selectElem) {
   const player = document.getElementById('main-audio-player');
   const playBtn = document.getElementById('audio-play-btn');
-  const select = document.getElementById('audio-track-select');
   const titleSpan = document.getElementById('track-title');
+  const albumSpan = document.getElementById('track-album');
+  const coverImg = document.getElementById('album-art');
 
-  const selectedText = select.options[select.selectedIndex].text;
-  titleSpan.innerText = selectedText;
+  const selectedOpt = selectElem.options[selectElem.selectedIndex];
+  
+  // Extract custom attributes for title, album, and cover image
+  titleSpan.innerText = selectedOpt.getAttribute('data-title') || selectedOpt.text;
+  albumSpan.innerText = selectedOpt.getAttribute('data-album') || "Album";
+  
+  const newCover = selectedOpt.getAttribute('data-cover');
+  if (newCover) {
+    coverImg.src = newCover;
+  }
 
   const wasPlaying = !player.paused;
-  player.src = url;
+  player.src = selectElem.value;
   
   if (wasPlaying) {
     player.play();
@@ -415,3 +424,27 @@ function setAudioVolume(val) {
   const player = document.getElementById('main-audio-player');
   player.volume = val;
 }
+
+// Automatically play the next song when the current one ends, and stop at the end of the playlist
+document.addEventListener('DOMContentLoaded', () => {
+  const player = document.getElementById('main-audio-player');
+  const select = document.getElementById('audio-track-select');
+  const playBtn = document.getElementById('audio-play-btn');
+
+  if (player) {
+    player.addEventListener('ended', () => {
+      let nextIndex = select.selectedIndex + 1;
+      
+      // Check if there are more tracks remaining in the list
+      if (nextIndex < select.options.length) {
+        select.selectedIndex = nextIndex;
+        changeAudioTrack(select);
+        player.play();
+        if (playBtn) playBtn.innerText = '⏸';
+      } else {
+        // End of playlist reached: stop playback and reset play button state
+        if (playBtn) playBtn.innerText = '▶';
+      }
+    });
+  }
+});
