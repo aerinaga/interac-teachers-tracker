@@ -5,6 +5,10 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 // SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
+// Direct, reliable artwork links for SATURATION II and SATURATION
+const SATURATION_2_COVER = "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bf/25/11/bf2511cd-062e-a3b0-6d47-680c2f829f7f/191773663073.jpg/600x600bb.jpg";
+const SATURATION_1_COVER = "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg";
+
 // --- PLAYLIST CONFIGURATION ---
 const playlistData = [
   {
@@ -12,14 +16,14 @@ const playlistData = [
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    appleMusicUrl: "https://music.apple.com/nz/song/summer/1273819144"
+    coverUrl: SATURATION_2_COVER
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    appleMusicUrl: "https://music.apple.com/us/song/waste/1245319885"
+    coverUrl: SATURATION_1_COVER
   },
   {
     file: "Dijon - The Dress.mp3",
@@ -114,8 +118,7 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      appleMusicUrl: track.appleMusicUrl || null,
-      coverUrl: DEFAULT_COVER
+      coverUrl: track.coverUrl || DEFAULT_COVER
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -125,10 +128,8 @@ function initAudioPlaylist() {
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
 
-    // Fetch artwork directly from Apple Music page link if provided
-    if (track.appleMusicUrl) {
-      fetchAppleMusicArt(index, track.appleMusicUrl);
-    } else {
+    // Only query API if coverUrl is missing
+    if (!track.coverUrl) {
       fetchMetadataFromAPI(index);
     }
   });
@@ -136,37 +137,6 @@ function initAudioPlaylist() {
   if (trackMetadataCache.length > 0) {
     loadTrackIntoUI(0, false);
   }
-}
-
-function fetchAppleMusicArt(index, appleUrl) {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(appleUrl)}`;
-
-  fetch(proxyUrl)
-    .then(res => {
-      if (!res.ok) throw new Error("Proxy error");
-      return res.json();
-    })
-    .then(data => {
-      if (data && data.contents) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, 'text/html');
-        
-        // Find open graph meta image tag
-        const metaImg = doc.querySelector('meta[property="og:image"]') || doc.querySelector('meta[name="twitter:image"]');
-        if (metaImg && metaImg.content) {
-          let artUrl = metaImg.content;
-          // Scale image resolution to 600x600
-          artUrl = artUrl.replace(/\/\d+x\d+bb/g, '/600x600bb').replace(/\/\d+x\d+cw/g, '/600x600bb');
-          trackMetadataCache[index].coverUrl = artUrl;
-          updateTrackUIIfActive(index);
-        }
-      }
-    })
-    .catch(err => {
-      console.warn("Failed to scrape Apple Music artwork for index", index, err);
-      // Fallback to iTunes Search API if scraping fails
-      fetchMetadataFromAPI(index);
-    });
 }
 
 function fetchMetadataFromAPI(index) {
@@ -205,7 +175,6 @@ function updateTrackUIIfActive(index) {
     
     const imgElem = document.getElementById('album-art');
     if (imgElem) {
-      imgElem.referrerPolicy = "no-referrer";
       imgElem.src = info.coverUrl || DEFAULT_COVER;
     }
   }
@@ -225,13 +194,10 @@ function loadTrackIntoUI(index, autoPlay = false) {
   
   const imgElem = document.getElementById('album-art');
   if (imgElem) {
-    imgElem.referrerPolicy = "no-referrer";
-    
     imgElem.onerror = function() {
       this.onerror = null;
       this.src = DEFAULT_COVER;
     };
-    
     imgElem.src = info.coverUrl || DEFAULT_COVER;
   }
 
