@@ -2,7 +2,7 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// SVG placeholder generated locally to prevent broken image icons on CORS issues
+// SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
 // --- PLAYLIST CONFIGURATION ---
@@ -12,77 +12,84 @@ const playlistData = [
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/23/Saturation_II.jpg"
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/2e/Brockhampton_-_Saturation.jpg"
   },
   {
     file: "Dijon - The Dress.mp3",
     title: "The Dress",
     artist: "Dijon",
     album: "Absolutely",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/e0/Dijon_-_Absolutely.jpg"
   },
   {
     file: "Lauv - Never Not.mp3",
     title: "Never Not",
     artist: "Lauv",
     album: "I met you when I was 18.",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/e8/I_Met_You_When_I_Was_18_%28The_Playlist%29.jpg"
   },
   {
     file: "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
     title: "STUPID IN LOVE",
     artist: "MAX, HUH YUNJIN",
     album: "LOVE IN STEREO",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dd/MAX_-_Love_in_Stereo.jpg"
   },
   {
     file: "MAX, keshi - IT'S YOU (feat. keshi).mp3",
     title: "IT'S YOU (feat. keshi)",
     artist: "MAX, keshi",
     album: "LOVE IN STEREO",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dd/MAX_-_Love_in_Stereo.jpg"
   },
   {
     file: "Mk.gee - I Want.mp3",
     title: "I Want",
     artist: "Mk.gee",
     album: "Two Star & The Dream Police",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/0/03/Mk.gee_-_Two_Star_%26_the_Dream_Police.jpg"
   },
   {
     file: "RIIZE - Love 119.mp3",
     title: "Love 119",
     artist: "RIIZE",
     album: "Love 119 - Single",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/0/0d/RIIZE_-_Love_119.jpg"
+  },
+  {
+    file: "starfall - intentions.mp3",
+    title: "intentions",
+    artist: "starfall",
+    album: "alone tonight - EP",
+    coverUrl: "https://i.scdn.co/image/ab67616d0000b273ef33a38a7c1dd30ef65e1d3e"
   },
   {
     file: "XG - LEFT RIGHT.mp3",
     title: "LEFT RIGHT",
     artist: "XG",
     album: "SHOOTING STAR",
-    coverUrl: DEFAULT_COVER
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/5/53/XG_-_Shooting_Star.jpg"
   },
   {
     file: "Yel - About Last Night...mp3",
     title: "About Last Night...",
     artist: "Yel",
-    album: "Loading...",
-    coverUrl: DEFAULT_COVER
+    album: "About Last Night...",
+    coverUrl: "https://i1.sndcdn.com/artworks-HWW85x3i1bOq-0-t500x500.jpg"
   },
   {
     file: "Yel - GHOST.mp3",
     title: "GHOST",
     artist: "Yel",
-    album: "Loading...",
-    coverUrl: DEFAULT_COVER
+    album: "GHOST",
+    coverUrl: "https://i1.sndcdn.com/artworks-mAnJbUv2O1oH-0-t500x500.jpg"
   }
 ];
 
@@ -130,41 +137,80 @@ function initAudioPlaylist() {
   }
 }
 
+// Extract ID3 metadata or fetch dynamically from online APIs
 function fetchEmbeddedID3Tags(index) {
   const info = trackMetadataCache[index];
-  if (!info || info.tagsLoaded || !window.jsmediatags) return;
+  if (!info || info.tagsLoaded) return;
 
-  window.jsmediatags.read(info.url, {
-    onSuccess: function(tag) {
-      const tags = tag.tags;
-      if (tags.title) info.title = tags.title;
-      if (tags.artist) info.artist = tags.artist;
-      if (tags.album) info.album = tags.album;
+  if (window.jsmediatags) {
+    window.jsmediatags.read(info.url, {
+      onSuccess: function(tag) {
+        const tags = tag.tags;
+        if (tags.title) info.title = tags.title;
+        if (tags.artist) info.artist = tags.artist;
+        if (tags.album) info.album = tags.album;
 
-      if (tags.picture) {
-        const picture = tags.picture;
-        let base64String = "";
-        for (let i = 0; i < picture.data.length; i++) {
-          base64String += String.fromCharCode(picture.data[i]);
+        if (tags.picture) {
+          const picture = tags.picture;
+          let base64String = "";
+          for (let i = 0; i < picture.data.length; i++) {
+            base64String += String.fromCharCode(picture.data[i]);
+          }
+          info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
         }
-        info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
-      }
 
-      info.tagsLoaded = true;
-
-      // Update UI dynamically if this track is active
-      const selectElem = document.getElementById('audio-track-select');
-      if (selectElem && parseInt(selectElem.value, 10) === index) {
-        document.getElementById('track-title').innerText = info.title;
-        document.getElementById('track-artist').innerText = info.artist;
-        document.getElementById('track-album').innerText = info.album;
-        document.getElementById('album-art').src = info.coverUrl;
+        info.tagsLoaded = true;
+        updateTrackUIIfActive(index);
+      },
+      onError: function() {
+        fetchMetadataFromAPI(index);
       }
-    },
-    onError: function(error) {
+    });
+  } else {
+    fetchMetadataFromAPI(index);
+  }
+}
+
+function fetchMetadataFromAPI(index) {
+  const info = trackMetadataCache[index];
+  if (!info) return;
+
+  // If coverUrl is set and valid, no API lookup needed
+  if (info.coverUrl && info.coverUrl !== DEFAULT_COVER) {
+    info.tagsLoaded = true;
+    return;
+  }
+
+  const query = encodeURIComponent(`${info.artist} ${info.title}`);
+  fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.results && data.results.length > 0) {
+        const result = data.results[0];
+        if (result.artworkUrl100) {
+          info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
+        }
+        if (result.collectionName) info.album = result.collectionName;
+        if (result.trackName) info.title = result.trackName;
+        if (result.artistName) info.artist = result.artistName;
+      }
       info.tagsLoaded = true;
-    }
-  });
+      updateTrackUIIfActive(index);
+    })
+    .catch(() => {
+      info.tagsLoaded = true;
+    });
+}
+
+function updateTrackUIIfActive(index) {
+  const selectElem = document.getElementById('audio-track-select');
+  if (selectElem && parseInt(selectElem.value, 10) === index) {
+    const info = trackMetadataCache[index];
+    document.getElementById('track-title').innerText = info.title;
+    document.getElementById('track-artist').innerText = info.artist;
+    document.getElementById('track-album').innerText = info.album;
+    document.getElementById('album-art').src = info.coverUrl;
+  }
 }
 
 function loadTrackIntoUI(index, autoPlay = false) {
@@ -188,14 +234,13 @@ function loadTrackIntoUI(index, autoPlay = false) {
   selectElem.value = index;
   player.src = info.url;
 
-  // Extract MP3 ID3 tags and embedded album covers automatically when available
   fetchEmbeddedID3Tags(index);
 
   if (autoPlay) {
     player.play().then(() => {
       if (playBtn) playBtn.innerText = '⏸';
     }).catch(e => {
-      console.warn("Autoplay blocked or playback error:", e);
+      console.warn("Autoplay blocked:", e);
     });
   }
 }
@@ -229,7 +274,7 @@ function setAudioVolume(val) {
   player.volume = val;
 }
 
-// Auto-play next track when current song finishes
+// Auto-play next track when song finishes
 document.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('main-audio-player');
   const selectElem = document.getElementById('audio-track-select');
