@@ -2,23 +2,86 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// ADD ALL YOUR MP3 FILENAMES HERE (Standard plain text filenames)
-const playlistFiles = [
-  "BROCKHAMPTON - SUMMER.mp3",
-  "BROCKHAMPTON - WASTE.mp3",
-  "Dijon - The Dress.mp3",
-  "Lauv - Never Not.mp3",
-  "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
-  "MAX, keshi - IT'S YOU (feat. keshi).mp3",
-  "Mk.gee - I Want.mp3",
-  "RIIZE - Love 119.mp3",
-  "XG - LEFT RIGHT.mp3",
-  "Yel - About Last Night...mp3",
-  "Yel - GHOST.mp3"
+// --- PLAYLIST CONFIGURATION WITH ALBUM ART & METADATA ---
+const playlistData = [
+  {
+    file: "BROCKHAMPTON - SUMMER.mp3",
+    title: "SUMMER",
+    artist: "BROCKHAMPTON",
+    album: "SATURATION II",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/23/Brockhampton_-_Saturation_II.png"
+  },
+  {
+    file: "BROCKHAMPTON - WASTE.mp3",
+    title: "WASTE",
+    artist: "BROCKHAMPTON",
+    album: "SATURATION",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/eb/Brockhampton_-_Saturation.png"
+  },
+  {
+    file: "Dijon - The Dress.mp3",
+    title: "The Dress",
+    artist: "Dijon",
+    album: "Absolutely",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dc/Dijon_-_Absolutely.png"
+  },
+  {
+    file: "Lauv - Never Not.mp3",
+    title: "Never Not",
+    artist: "Lauv",
+    album: "I met you when I was 18.",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/df/Lauv_-_I_Met_You_When_I_Was_18._%28the_playlist%29.png"
+  },
+  {
+    file: "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
+    title: "STUPID IN LOVE",
+    artist: "MAX, HUH YUNJIN",
+    album: "LOVE IN STEREO",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/7/77/MAX_-_Love_in_Stereo.jpg"
+  },
+  {
+    file: "MAX, keshi - IT'S YOU (feat. keshi).mp3",
+    title: "IT'S YOU (feat. keshi)",
+    artist: "MAX, keshi",
+    album: "LOVE IN STEREO",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/7/77/MAX_-_Love_in_Stereo.jpg"
+  },
+  {
+    file: "Mk.gee - I Want.mp3",
+    title: "I Want",
+    artist: "Mk.gee",
+    album: "Two Star & The Dream Police",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/30/Mk.gee_-_Two_Star_%26_The_Dream_Police.png"
+  },
+  {
+    file: "RIIZE - Love 119.mp3",
+    title: "Love 119",
+    artist: "RIIZE",
+    album: "Love 119 - Single",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/8/87/Riize_-_Love_119.jpeg"
+  },
+  {
+    file: "XG - LEFT RIGHT.mp3",
+    title: "LEFT RIGHT",
+    artist: "XG",
+    album: "SHOOTING STAR",
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/1/1a/XG_-_Shooting_Star.jpeg"
+  },
+  {
+    file: "Yel - About Last Night...mp3",
+    title: "About Last Night...",
+    artist: "Yel",
+    album: "Single",
+    coverUrl: "JP%20Logo.png"
+  },
+  {
+    file: "Yel - GHOST.mp3",
+    title: "GHOST",
+    artist: "Yel",
+    album: "Single",
+    coverUrl: "JP%20Logo.png"
+  }
 ];
-
-// Fallback image if MP3 has no embedded album cover art
-const DEFAULT_COVER = "JP%20Logo.png";
 
 let trackMetadataCache = [];
 
@@ -28,11 +91,10 @@ window.onload = function() {
   future.setDate(today.getDate() + 14);
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
   
-  // Load playlist immediately from file names so UI never gets stuck
   initAudioPlaylist();
 };
 
-// --- AUDIO PLAYER & MP3 METADATA SYSTEM ---
+// --- AUDIO PLAYER SYSTEM ---
 
 function initAudioPlaylist() {
   const selectElem = document.getElementById('audio-track-select');
@@ -41,27 +103,14 @@ function initAudioPlaylist() {
   selectElem.innerHTML = "";
   trackMetadataCache = [];
 
-  playlistFiles.forEach((file, index) => {
-    // Parse "Artist - Title.mp3" from filename automatically as instant fallback
-    const cleanFileName = decodeURIComponent(file).replace(/\.mp3$/i, '');
-    const parts = cleanFileName.split(' - ');
-    
-    let defaultArtist = "Unknown Artist";
-    let defaultTitle = cleanFileName;
-
-    if (parts.length >= 2) {
-      defaultArtist = parts[0].trim();
-      defaultTitle = parts.slice(1).join(' - ').trim();
-    }
-
+  playlistData.forEach((track, index) => {
     const trackInfo = {
       index: index,
-      url: encodeURIComponent(file).replace(/%2F/g, '/'),
-      title: defaultTitle,
-      artist: defaultArtist,
-      album: "Audio Track",
-      coverUrl: DEFAULT_COVER,
-      tagsLoaded: false
+      url: encodeURIComponent(track.file).replace(/%2F/g, '/'),
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      coverUrl: track.coverUrl
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -72,52 +121,9 @@ function initAudioPlaylist() {
     selectElem.appendChild(opt);
   });
 
-  // Display first track instantly
   if (trackMetadataCache.length > 0) {
     loadTrackIntoUI(0, false);
   }
-}
-
-function fetchID3Tags(index) {
-  const info = trackMetadataCache[index];
-  if (!info || info.tagsLoaded || !window.jsmediatags) return;
-
-  window.jsmediatags.read(info.url, {
-    onSuccess: function(tag) {
-      const tags = tag.tags;
-      if (tags.title) info.title = tags.title;
-      if (tags.artist) info.artist = tags.artist;
-      if (tags.album) info.album = tags.album;
-
-      if (tags.picture) {
-        const picture = tags.picture;
-        let base64String = "";
-        for (let i = 0; i < picture.data.length; i++) {
-          base64String += String.fromCharCode(picture.data[i]);
-        }
-        info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
-      }
-
-      info.tagsLoaded = true;
-
-      // Re-render UI if this track is currently active
-      const selectElem = document.getElementById('audio-track-select');
-      if (selectElem && parseInt(selectElem.value, 10) === index) {
-        document.getElementById('track-title').innerText = info.title;
-        document.getElementById('track-artist').innerText = info.artist;
-        document.getElementById('track-album').innerText = info.album;
-        document.getElementById('album-art').src = info.coverUrl;
-        
-        if (selectElem.options[index]) {
-          selectElem.options[index].text = info.title;
-        }
-      }
-    },
-    onError: function(error) {
-      console.warn("Could not parse ID3 tags for:", info.url, error);
-      info.tagsLoaded = true; // prevent retrying continuously
-    }
-  });
 }
 
 function loadTrackIntoUI(index, autoPlay = false) {
@@ -135,9 +141,6 @@ function loadTrackIntoUI(index, autoPlay = false) {
 
   selectElem.value = index;
   player.src = info.url;
-
-  // Fetch ID3 Tags in background for current playing track
-  fetchID3Tags(index);
 
   if (autoPlay) {
     player.play();
@@ -176,7 +179,7 @@ function setAudioVolume(val) {
   player.volume = val;
 }
 
-// Play next song automatically on end, stop at end of playlist
+// Auto-play next track on song end
 document.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('main-audio-player');
   const selectElem = document.getElementById('audio-track-select');
@@ -186,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     player.addEventListener('ended', () => {
       let nextIndex = parseInt(selectElem.value, 10) + 1;
 
-      if (nextIndex < playlistFiles.length) {
+      if (nextIndex < playlistData.length) {
         loadTrackIntoUI(nextIndex, true);
       } else {
         if (playBtn) playBtn.innerText = '▶';
