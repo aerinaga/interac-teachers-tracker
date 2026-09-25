@@ -2,14 +2,186 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+// ADD ALL YOUR MP3 FILENAMES HERE
+const playlistFiles = [
+  "Yel%20-%20GHOST.mp3",
+  "BROCKHAMPTON%20-%20SUMMER.mp3",
+  "BROCKHAMPTON%20-%20WASTE.mp3",
+  "Dijon%20-%20The%20Dress.mp3",
+  "Lauv%20-%20Never%20Not.mp3",
+  "MAX%2C%20HUH%20YUNJIN%20-%20STUPID%20IN%20LOVE.mp3",
+  "MAX%2C%20keshi%20-%20IT%27S%20YOU%20%28feat.%20keshi%29.mp3",
+  "Mk.gee%20-%20I%20Want.mp3",
+  "RIIZE%20-%20Love%20119.mp3",
+  "XG%20-%20LEFT%20RIGHT.mp3",
+  "Yel%20-%20About%20Last%20Night...mp3",
+];
+
+// Fallback image if MP3 has no embedded album cover art
+const DEFAULT_COVER = "JP%20Logo.png";
+
+let trackMetadataCache = [];
+
 window.onload = function() {
   const today = new Date();
   const future = new Date();
   future.setDate(today.getDate() + 14);
   document.getElementById('date-range-note').innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
+  
+  // Load playlist and extract MP3 metadata
+  initAudioPlaylist();
 };
 
-// Confirmation modal for materials
+// --- AUDIO PLAYER & MP3 METADATA SYSTEM ---
+
+function initAudioPlaylist() {
+  const selectElem = document.getElementById('audio-track-select');
+  if (!selectElem) return;
+
+  selectElem.innerHTML = "";
+  trackMetadataCache = [];
+
+  let loadedCount = 0;
+
+  playlistFiles.forEach((fileUrl, index) => {
+    // Default fallback object
+    const trackInfo = {
+      index: index,
+      url: fileUrl,
+      title: decodeURIComponent(fileUrl).replace(/\.mp3$/i, ''),
+      artist: "Unknown Artist",
+      album: "Unknown Album",
+      coverUrl: DEFAULT_COVER
+    };
+
+    trackMetadataCache[index] = trackInfo;
+
+    // Read ID3 metadata using jsmediatags
+    if (window.jsmediatags) {
+      window.jsmediatags.read(fileUrl, {
+        onSuccess: function(tag) {
+          const tags = tag.tags;
+          if (tags.title) trackInfo.title = tags.title;
+          if (tags.artist) trackInfo.artist = tags.artist;
+          if (tags.album) trackInfo.album = tags.album;
+
+          // Extract embedded album cover art image data
+          if (tags.picture) {
+            const picture = tags.picture;
+            let base64String = "";
+            for (let i = 0; i < picture.data.length; i++) {
+              base64String += String.fromCharCode(picture.data[i]);
+            }
+            const base64 = "data:" + picture.format + ";base64," + window.btoa(base64String);
+            trackInfo.coverUrl = base64;
+          }
+
+          updateTrackOptionUI(index);
+          loadedCount++;
+          if (index === 0) loadTrackIntoUI(0);
+        },
+        onError: function(error) {
+          console.warn("Could not read ID3 metadata for:", fileUrl, error);
+          updateTrackOptionUI(index);
+          loadedCount++;
+          if (index === 0) loadTrackIntoUI(0);
+        }
+      });
+    } else {
+      updateTrackOptionUI(index);
+      if (index === 0) loadTrackIntoUI(0);
+    }
+  });
+}
+
+function updateTrackOptionUI(index) {
+  const selectElem = document.getElementById('audio-track-select');
+  const info = trackMetadataCache[index];
+  
+  let opt = selectElem.options[index];
+  if (!opt) {
+    opt = document.createElement('option');
+    opt.value = index;
+    selectElem.appendChild(opt);
+  }
+  opt.text = info.title;
+}
+
+function loadTrackIntoUI(index, autoPlay = false) {
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const selectElem = document.getElementById('audio-track-select');
+  const info = trackMetadataCache[index];
+
+  if (!info) return;
+
+  document.getElementById('track-title').innerText = info.title;
+  document.getElementById('track-artist').innerText = info.artist;
+  document.getElementById('track-album').innerText = info.album;
+  document.getElementById('album-art').src = info.coverUrl;
+
+  selectElem.selectedIndex = index;
+  player.src = info.url;
+
+  if (autoPlay) {
+    player.play();
+    if (playBtn) playBtn.innerText = '⏸';
+  }
+}
+
+function toggleAudioPlay() {
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const selectElem = document.getElementById('audio-track-select');
+
+  if (!player.src || player.src === "" || player.src.endsWith('/')) {
+    loadTrackIntoUI(selectElem.selectedIndex || 0);
+  }
+
+  if (player.paused) {
+    player.play();
+    playBtn.innerText = '⏸';
+  } else {
+    player.pause();
+    playBtn.innerText = '▶';
+  }
+}
+
+function onTrackSelectChange(selectElem) {
+  const selectedIndex = parseInt(selectElem.value, 10);
+  const player = document.getElementById('main-audio-player');
+  const wasPlaying = !player.paused;
+
+  loadTrackIntoUI(selectedIndex, wasPlaying);
+}
+
+function setAudioVolume(val) {
+  const player = document.getElementById('main-audio-player');
+  player.volume = val;
+}
+
+// Automatically play the next song when finished, and stop at the end of the playlist
+document.addEventListener('DOMContentLoaded', () => {
+  const player = document.getElementById('main-audio-player');
+  const selectElem = document.getElementById('audio-track-select');
+  const playBtn = document.getElementById('audio-play-btn');
+
+  if (player) {
+    player.addEventListener('ended', () => {
+      let nextIndex = selectElem.selectedIndex + 1;
+
+      if (nextIndex < playlistFiles.length) {
+        loadTrackIntoUI(nextIndex, true);
+      } else {
+        // Stop playback at end of playlist
+        if (playBtn) playBtn.innerText = '▶';
+      }
+    });
+  }
+});
+
+// --- GOOGLE SHEETS & LESSON TRACKER FUNCTIONS ---
+
 function confirmMaterial(url, materialName, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -46,7 +218,6 @@ function confirmMaterial(url, materialName, timeStr, studentName, area) {
   });
 }
 
-// Confirmation modal for meeting links (Zoom/Teams/Portals)
 function confirmMeeting(url, timeStr, studentName, area) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -83,7 +254,6 @@ function confirmMeeting(url, timeStr, studentName, area) {
   });
 }
 
-// Generic link confirmation for generic or raw links
 function confirmGenericLink(url, label) {
   if (!url || url === '#' || url.trim() === '') return;
 
@@ -119,7 +289,6 @@ function confirmGenericLink(url, label) {
   });
 }
 
-// Helper to parse date text like "07/September(Mon)" into a JavaScript Date object
 function parseSheetDate(rawDateStr) {
   if (!rawDateStr) return null;
   const match = String(rawDateStr).match(/^(\d{1,2})\/([A-Za-z]+)/);
@@ -135,7 +304,6 @@ function parseSheetDate(rawDateStr) {
   return null;
 }
 
-// Fetch cell B1 directly from CSV endpoint to safely retrieve merged B1:F1 link
 async function fetchCellB1Url() {
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_TAB_NAME)}&tqx=out:csv&range=B1:F1`;
   try {
@@ -209,7 +377,6 @@ async function doSearch() {
           
           const isJpBackup = studentGroup.toLowerCase().includes("jp back up");
           
-          // Validation: If no USER ID or Password, or if it's a JP Backup row, suppress cloud link
           let finalCloudLink = cloudLink;
           if (isJpBackup || !userId || !password) {
             finalCloudLink = "-";
@@ -296,7 +463,7 @@ function render(rows) {
       let content = String(cell || "").trim();
       const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
 
-      if (i === 13) { // TEACHER'S CLOUD LINK
+      if (i === 13) { 
         if (content.startsWith('http')) {
           const btnId = `cloud-btn-${rowIndex}`;
           html += `<td><button id="${btnId}" class="btn-link">LINK</button></td>`;
@@ -307,7 +474,7 @@ function render(rows) {
         } else {
           html += `<td>-</td>`;
         }
-      } else if (i === 15) { // MATERIAL URL
+      } else if (i === 15) { 
         if (isFinished) {
           html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
         } else if (content) {
@@ -336,7 +503,7 @@ function render(rows) {
         } else {
           html += `<td>-</td>`;
         }
-      } else if (i === 16) { // FEEDBACK LINK
+      } else if (i === 16) { 
         if (content.startsWith('http')) {
           const btnId = `feedback-btn-${rowIndex}`;
           html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
@@ -347,7 +514,7 @@ function render(rows) {
         } else {
           html += `<td>No Feedback</td>`;
         }
-      } else if (i === 17) { // MEETING LINK (Col Q)
+      } else if (i === 17) { 
         if (content.startsWith('http')) {
           const btnId = `urllink-btn-${rowIndex}`;
           html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
@@ -373,78 +540,3 @@ function render(rows) {
   });
   document.getElementById('results').innerHTML = html + '</tbody></table>';
 }
-
-// Global Audio Player Controls
-function toggleAudioPlay() {
-  const player = document.getElementById('main-audio-player');
-  const playBtn = document.getElementById('audio-play-btn');
-  const select = document.getElementById('audio-track-select');
-
-  if (!player.src || player.src === "" || player.src.endsWith('/')) {
-    player.src = select.value;
-  }
-
-  if (player.paused) {
-    player.play();
-    playBtn.innerText = '⏸';
-  } else {
-    player.pause();
-    playBtn.innerText = '▶';
-  }
-}
-
-function changeAudioTrack(selectElem) {
-  const player = document.getElementById('main-audio-player');
-  const playBtn = document.getElementById('audio-play-btn');
-  const titleSpan = document.getElementById('track-title');
-  const albumSpan = document.getElementById('track-album');
-  const coverImg = document.getElementById('album-art');
-
-  const selectedOpt = selectElem.options[selectElem.selectedIndex];
-  
-  // Extract custom attributes for title, album, and cover image
-  titleSpan.innerText = selectedOpt.getAttribute('data-title') || selectedOpt.text;
-  albumSpan.innerText = selectedOpt.getAttribute('data-album') || "Album";
-  
-  const newCover = selectedOpt.getAttribute('data-cover');
-  if (newCover) {
-    coverImg.src = newCover;
-  }
-
-  const wasPlaying = !player.paused;
-  player.src = selectElem.value;
-  
-  if (wasPlaying) {
-    player.play();
-    playBtn.innerText = '⏸';
-  }
-}
-
-function setAudioVolume(val) {
-  const player = document.getElementById('main-audio-player');
-  player.volume = val;
-}
-
-// Automatically play the next song when the current one ends, and stop at the end of the playlist
-document.addEventListener('DOMContentLoaded', () => {
-  const player = document.getElementById('main-audio-player');
-  const select = document.getElementById('audio-track-select');
-  const playBtn = document.getElementById('audio-play-btn');
-
-  if (player) {
-    player.addEventListener('ended', () => {
-      let nextIndex = select.selectedIndex + 1;
-      
-      // Check if there are more tracks remaining in the list
-      if (nextIndex < select.options.length) {
-        select.selectedIndex = nextIndex;
-        changeAudioTrack(select);
-        player.play();
-        if (playBtn) playBtn.innerText = '⏸';
-      } else {
-        // End of playlist reached: stop playback and reset play button state
-        if (playBtn) playBtn.innerText = '▶';
-      }
-    });
-  }
-});
