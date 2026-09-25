@@ -12,14 +12,14 @@ const playlistData = [
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/08/9d/28/089d28e7-f831-23b9-a477-9a8bb6d11b51/191773663073.jpg/600x600bb.jpg"
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/23/Saturation_II.jpg"
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bd/c8/13/bdc8135d-6c1d-1d21-f04b-f28a3068e64e/191773539187.jpg/600x600bb.jpg"
+    coverUrl: "https://upload.wikimedia.org/wikipedia/en/7/70/Saturation_-_Brockhampton.jpg"
   },
   {
     file: "Dijon - The Dress.mp3",
@@ -124,8 +124,7 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      coverUrl: track.coverUrl || DEFAULT_COVER,
-      tagsLoaded: false
+      coverUrl: track.coverUrl || DEFAULT_COVER
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -138,43 +137,6 @@ function initAudioPlaylist() {
 
   if (trackMetadataCache.length > 0) {
     loadTrackIntoUI(0, false);
-  }
-}
-
-function fetchMetadataFromAPI(index) {
-  const info = trackMetadataCache[index];
-  if (!info) return;
-
-  const query = encodeURIComponent(`${info.artist} ${info.title}`);
-  fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.results && data.results.length > 0) {
-        const result = data.results[0];
-        if (result.artworkUrl100) {
-          info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
-        }
-        if (result.collectionName) info.album = result.collectionName;
-      }
-      info.tagsLoaded = true;
-      updateTrackUIIfActive(index);
-    })
-    .catch(() => {
-      info.tagsLoaded = true;
-    });
-}
-
-function updateTrackUIIfActive(index) {
-  const selectElem = document.getElementById('audio-track-select');
-  if (selectElem && parseInt(selectElem.value, 10) === index) {
-    const info = trackMetadataCache[index];
-    document.getElementById('track-title').innerText = info.title;
-    document.getElementById('track-artist').innerText = info.artist;
-    document.getElementById('track-album').innerText = info.album;
-    
-    const imgElem = document.getElementById('album-art');
-    imgElem.referrerPolicy = "no-referrer";
-    imgElem.src = info.coverUrl;
   }
 }
 
@@ -195,10 +157,8 @@ function loadTrackIntoUI(index, autoPlay = false) {
   imgElem.referrerPolicy = "no-referrer";
   
   imgElem.onerror = function() {
-    console.warn(`Cover URL failed for track ${index}, fetching API fallback...`);
     this.onerror = null;
     this.src = DEFAULT_COVER;
-    fetchMetadataFromAPI(index);
   };
   
   imgElem.src = info.coverUrl;
