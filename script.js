@@ -373,3 +373,45 @@ function render(rows) {
   });
   document.getElementById('results').innerHTML = html + '</tbody></table>';
 }
+
+// Global Audio Player Controls
+function toggleAudioPlay() {
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const select = document.getElementById('audio-track-select');
+
+  if (!player.src || player.src === "" || player.src.endsWith('/')) {
+    player.src = select.value;
+  }
+
+  if (player.paused) {
+    player.play();
+    playBtn.innerText = '⏸';
+  } else {
+    player.pause();
+    playBtn.innerText = '▶';
+  }
+}
+
+function changeAudioTrack(url) {
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const select = document.getElementById('audio-track-select');
+  const titleSpan = document.getElementById('track-title');
+
+  const selectedText = select.options[select.selectedIndex].text;
+  titleSpan.innerText = selectedText;
+
+  const wasPlaying = !player.paused;
+  player.src = url;
+  
+  if (wasPlaying) {
+    player.play();
+    playBtn.innerText = '⏸';
+  }
+}
+
+function setAudioVolume(val) {
+  const player = document.getElementById('main-audio-player');
+  player.volume = val;
+}
