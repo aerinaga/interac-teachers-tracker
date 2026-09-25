@@ -178,7 +178,7 @@ body {
   position: absolute;
   top: 10px;
   right: 15px;
-  width: 180px;
+  width: 185px;
   padding: 12px;
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
@@ -196,8 +196,8 @@ body {
 
 /* Album Art Display */
 .album-art-wrapper {
-  width: 90px;
-  height: 90px;
+  width: 95px;
+  height: 95px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -211,11 +211,11 @@ body {
   display: block;
 }
 
-/* Track & Album Text */
+/* Track, Artist & Album Text Layout */
 .player-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   width: 100%;
 }
 
@@ -228,8 +228,17 @@ body {
   text-overflow: ellipsis;
 }
 
-.track-album {
+.track-artist {
   font-size: 11px;
+  font-weight: 700;
+  color: #3a3a3c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-album {
+  font-size: 10px;
   font-weight: 600;
   color: #8e8e93;
   white-space: nowrap;
