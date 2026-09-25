@@ -175,6 +175,111 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
+/* Top Audio Bar Styles */
+.audio-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 750px;
+  margin: 16px auto 0 auto;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+}
+
+.audio-track-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audio-icon {
+  font-size: 16px;
+}
+
+.track-details {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.track-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1c1c1e;
+}
+
+.track-artist {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8e8e93;
+}
+
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audio-btn {
+  background-color: #007aff;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.audio-btn:hover {
+  background-color: #0056b3;
+}
+
+.audio-btn:active {
+  transform: scale(0.95);
+}
+
+.track-select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #c7c7cc;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1c1c1e;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+}
+
+.audio-volume-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.volume-icon {
+  font-size: 12px;
+}
+
+.volume-slider {
+  width: 60px;
+  accent-color: #007aff;
+  cursor: pointer;
+}
+
 /* Backup Notice Section */
 .backup-note-container {
   display: flex;
@@ -199,7 +304,7 @@ body {
 
 /* Character Image */
 .backup-pointer-img {
-  height: 185px;         
+  height: 185px;          
   width: auto;            
   object-fit: contain;     
   transform: scaleX(-1);   
