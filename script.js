@@ -2,84 +2,87 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// --- PLAYLIST CONFIGURATION WITH ALBUM ART & METADATA ---
+// SVG placeholder generated locally to prevent broken image icons on CORS issues
+const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
+
+// --- PLAYLIST CONFIGURATION ---
 const playlistData = [
   {
     file: "BROCKHAMPTON - SUMMER.mp3",
     title: "SUMMER",
     artist: "BROCKHAMPTON",
     album: "SATURATION II",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/2/23/Brockhampton_-_Saturation_II.png"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "BROCKHAMPTON - WASTE.mp3",
     title: "WASTE",
     artist: "BROCKHAMPTON",
     album: "SATURATION",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/e/eb/Brockhampton_-_Saturation.png"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "Dijon - The Dress.mp3",
     title: "The Dress",
     artist: "Dijon",
     album: "Absolutely",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/dc/Dijon_-_Absolutely.png"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "Lauv - Never Not.mp3",
     title: "Never Not",
     artist: "Lauv",
     album: "I met you when I was 18.",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/d/df/Lauv_-_I_Met_You_When_I_Was_18._%28the_playlist%29.png"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
     title: "STUPID IN LOVE",
     artist: "MAX, HUH YUNJIN",
     album: "LOVE IN STEREO",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/7/77/MAX_-_Love_in_Stereo.jpg"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "MAX, keshi - IT'S YOU (feat. keshi).mp3",
     title: "IT'S YOU (feat. keshi)",
     artist: "MAX, keshi",
     album: "LOVE IN STEREO",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/7/77/MAX_-_Love_in_Stereo.jpg"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "Mk.gee - I Want.mp3",
     title: "I Want",
     artist: "Mk.gee",
     album: "Two Star & The Dream Police",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/30/Mk.gee_-_Two_Star_%26_The_Dream_Police.png"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "RIIZE - Love 119.mp3",
     title: "Love 119",
     artist: "RIIZE",
     album: "Love 119 - Single",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/8/87/Riize_-_Love_119.jpeg"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "XG - LEFT RIGHT.mp3",
     title: "LEFT RIGHT",
     artist: "XG",
     album: "SHOOTING STAR",
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/1/1a/XG_-_Shooting_Star.jpeg"
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "Yel - About Last Night...mp3",
     title: "About Last Night...",
     artist: "Yel",
-    album: "Single",
-    coverUrl: "JP%20Logo.png"
+    album: "Loading...",
+    coverUrl: DEFAULT_COVER
   },
   {
     file: "Yel - GHOST.mp3",
     title: "GHOST",
     artist: "Yel",
-    album: "Single",
-    coverUrl: "JP%20Logo.png"
+    album: "Loading...",
+    coverUrl: DEFAULT_COVER
   }
 ];
 
@@ -110,7 +113,8 @@ function initAudioPlaylist() {
       title: track.title,
       artist: track.artist,
       album: track.album,
-      coverUrl: track.coverUrl
+      coverUrl: track.coverUrl,
+      tagsLoaded: false
     };
 
     trackMetadataCache[index] = trackInfo;
@@ -126,6 +130,43 @@ function initAudioPlaylist() {
   }
 }
 
+function fetchEmbeddedID3Tags(index) {
+  const info = trackMetadataCache[index];
+  if (!info || info.tagsLoaded || !window.jsmediatags) return;
+
+  window.jsmediatags.read(info.url, {
+    onSuccess: function(tag) {
+      const tags = tag.tags;
+      if (tags.title) info.title = tags.title;
+      if (tags.artist) info.artist = tags.artist;
+      if (tags.album) info.album = tags.album;
+
+      if (tags.picture) {
+        const picture = tags.picture;
+        let base64String = "";
+        for (let i = 0; i < picture.data.length; i++) {
+          base64String += String.fromCharCode(picture.data[i]);
+        }
+        info.coverUrl = "data:" + picture.format + ";base64," + window.btoa(base64String);
+      }
+
+      info.tagsLoaded = true;
+
+      // Update UI dynamically if this track is active
+      const selectElem = document.getElementById('audio-track-select');
+      if (selectElem && parseInt(selectElem.value, 10) === index) {
+        document.getElementById('track-title').innerText = info.title;
+        document.getElementById('track-artist').innerText = info.artist;
+        document.getElementById('track-album').innerText = info.album;
+        document.getElementById('album-art').src = info.coverUrl;
+      }
+    },
+    onError: function(error) {
+      info.tagsLoaded = true;
+    }
+  });
+}
+
 function loadTrackIntoUI(index, autoPlay = false) {
   const player = document.getElementById('main-audio-player');
   const playBtn = document.getElementById('audio-play-btn');
@@ -137,14 +178,25 @@ function loadTrackIntoUI(index, autoPlay = false) {
   document.getElementById('track-title').innerText = info.title;
   document.getElementById('track-artist').innerText = info.artist;
   document.getElementById('track-album').innerText = info.album;
-  document.getElementById('album-art').src = info.coverUrl;
+  
+  const imgElem = document.getElementById('album-art');
+  imgElem.onerror = function() {
+    this.src = DEFAULT_COVER;
+  };
+  imgElem.src = info.coverUrl;
 
   selectElem.value = index;
   player.src = info.url;
 
+  // Extract MP3 ID3 tags and embedded album covers automatically when available
+  fetchEmbeddedID3Tags(index);
+
   if (autoPlay) {
-    player.play();
-    if (playBtn) playBtn.innerText = '⏸';
+    player.play().then(() => {
+      if (playBtn) playBtn.innerText = '⏸';
+    }).catch(e => {
+      console.warn("Autoplay blocked or playback error:", e);
+    });
   }
 }
 
@@ -154,7 +206,8 @@ function toggleAudioPlay() {
   const selectElem = document.getElementById('audio-track-select');
 
   if (!player.src || player.src === "" || player.src.endsWith('/')) {
-    loadTrackIntoUI(selectElem.value || 0);
+    loadTrackIntoUI(selectElem.value || 0, true);
+    return;
   }
 
   if (player.paused) {
@@ -168,10 +221,7 @@ function toggleAudioPlay() {
 
 function onTrackSelectChange(selectElem) {
   const selectedIndex = parseInt(selectElem.value, 10);
-  const player = document.getElementById('main-audio-player');
-  const wasPlaying = !player.paused;
-
-  loadTrackIntoUI(selectedIndex, wasPlaying);
+  loadTrackIntoUI(selectedIndex, true);
 }
 
 function setAudioVolume(val) {
@@ -179,7 +229,7 @@ function setAudioVolume(val) {
   player.volume = val;
 }
 
-// Auto-play next track on song end
+// Auto-play next track when current song finishes
 document.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('main-audio-player');
   const selectElem = document.getElementById('audio-track-select');
