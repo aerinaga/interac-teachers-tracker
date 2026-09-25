@@ -41,7 +41,7 @@ body {
 .search-container {
   position: relative;
   z-index: 1;
-  text-align: right;
+  text-align: center;
   width: 100%;
   max-width: 100%;
   margin: 0 auto 10px auto;
@@ -149,7 +149,6 @@ body {
   line-height: 1.4;
 }
 
-/* Colors & Rotation for Realistic Sticky Notes */
 .note-yellow {
   background-color: #fff8c5;
   border-top: 5px solid #f1c40f;
@@ -162,7 +161,6 @@ body {
   transform: rotate(1.5deg);
 }
 
-/* Pushpin graphic styling */
 .pin {
   position: absolute;
   top: -8px;
@@ -175,56 +173,77 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Top Audio Bar Styles */
-.audio-bar-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  max-width: 750px;
-  margin: 16px auto 0 auto;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  flex-wrap: wrap;
-}
-
-.audio-track-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.audio-icon {
-  font-size: 16px;
-}
-
-.track-details {
+/* Compact Square Audio Player Card (Top Right Position) */
+.audio-player-card {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  width: 180px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  text-align: left;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+/* Album Art Display */
+.album-art-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  background-color: #f2f2f7;
+}
+
+.album-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Track & Album Text */
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
 }
 
 .track-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: #1c1c1e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.track-artist {
-  font-size: 10px;
+.track-album {
+  font-size: 11px;
   font-weight: 600;
   color: #8e8e93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.audio-controls {
+/* Player Controls */
+.player-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
 }
 
 .audio-btn {
@@ -232,9 +251,9 @@ body {
   color: #ffffff;
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -242,6 +261,7 @@ body {
   justify-content: center;
   box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
   transition: transform 0.1s ease, background-color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .audio-btn:hover {
@@ -253,7 +273,7 @@ body {
 }
 
 .track-select {
-  padding: 4px 8px;
+  padding: 4px;
   border-radius: 6px;
   border: 1px solid #c7c7cc;
   font-size: 11px;
@@ -262,22 +282,36 @@ body {
   background-color: #ffffff;
   outline: none;
   cursor: pointer;
+  max-width: 110px;
 }
 
+/* Volume Bar */
 .audio-volume-wrapper {
   display: flex;
   align-items: center;
   gap: 4px;
+  width: 100%;
+  justify-content: center;
 }
 
 .volume-icon {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .volume-slider {
-  width: 60px;
+  width: 90px;
   accent-color: #007aff;
   cursor: pointer;
+}
+
+/* Responsive Handling for Small Screen Audio Player */
+@media (max-width: 900px) {
+  .audio-player-card {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin: 10px auto;
+  }
 }
 
 /* Backup Notice Section */
