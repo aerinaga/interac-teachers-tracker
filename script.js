@@ -20,7 +20,7 @@ const playlistData = [
     album: "I met you when I was 18."
   },
   {
-    file: "MAX, HUH YUNJIN - STUPID IN LOVE.mp3",
+    file: "MAX, HUH YUNJIN - STUPID IN LOVE (feat. HUH YUNJIN of LE SSERAFIM).mp3",
     title: "STUPID IN LOVE",
     artist: "MAX, HUH YUNJIN",
     album: "LOVE IN STEREO"
