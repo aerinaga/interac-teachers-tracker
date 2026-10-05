@@ -7,34 +7,28 @@
   
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- YouTube IFrame API Script (Required for audio player) -->
-  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-  <img src="JP%2520Logo.png" alt="Background Logo" class="bg-logo">
+  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
     <div class="search-container">
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Audio Music Player Card -->
+      <!-- Audio Music Player Card (Original Clean Design) -->
       <div class="audio-player-card">
-        <div class="player-header" style="display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="vinyl-icon">🎵</div>
-            <div class="track-info">
-              <span id="track-title" class="track-title">Select a track</span>
-              <span id="track-artist" class="track-artist">Music Player Ready</span>
-            </div>
+        <div class="player-header">
+          <div class="vinyl-icon">🎵</div>
+          <div class="track-info">
+            <span id="track-title" class="track-title">Select a track</span>
+            <span id="track-artist" class="track-artist">Music Player Ready</span>
           </div>
-          <!-- Manual Play/Pause Button to override browser autoplay blocks -->
-          <button id="manual-play-btn" onclick="togglePlayState()" style="background: #007aff; border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">▶ Play</button>
         </div>
 
-        <!-- Hidden audio frame container that plays the track -->
-        <div id="youtube-player-container" class="audio-iframe-hidden"></div>
+        <!-- Hidden HTML5 Audio Element for reliable playback -->
+        <audio id="html5-audio-player" preload="none"></audio>
 
         <!-- Music Search Bar Box -->
         <div class="music-search-box">
