@@ -25,17 +25,21 @@ window.onload = function() {
 // Required callback for YouTube IFrame API
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('youtube-player-container', {
-    height: '0',
-    width: '0',
+    height: '1',
+    width: '1',
     playerVars: {
       'autoplay': 1,
-      'controls': 0
+      'controls': 0,
+      'enablejsapi': 1,
+      'origin': window.location.origin
     },
     events: {
       'onReady': (event) => {
         isPlayerReady = true;
+        console.log("YouTube Player is ready!");
       },
-      'onStateChange': onPlayerStateChange
+      'onStateChange': onPlayerStateChange,
+      'onError': (err) => console.warn("YouTube Player Error:", err)
     }
   });
 }
@@ -51,7 +55,7 @@ function onPlayerStateChange(event) {
   }
 }
 
-// Search songs with wider variety via iTunes API (limit increased to 25)
+// Search songs via iTunes API
 async function searchYouTubeMusic() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -97,21 +101,25 @@ function loadAndPlaySong(title, artist, album, coverUrl) {
   document.getElementById('track-album').innerText = album;
   document.getElementById('album-art').src = coverUrl;
 
+  const searchQuery = `${title} ${artist} audio`;
+
   if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Player is initializing, please click play again in a second.', showConfirmButton: false, timer: 2000 });
-    // Attempt fallback init trigger
-    setTimeout(() => {
+    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Initializing player, starting track...', showConfirmButton: false, timer: 1500 });
+    
+    // Retry loading once the player finishes initializing
+    const checkReadyInterval = setInterval(() => {
       if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
+        clearInterval(checkReadyInterval);
         isPlayerReady = true;
-        ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
+        ytPlayer.loadVideoByQuery(searchQuery);
         ytPlayer.setVolume(document.getElementById('audio-volume').value);
       }
-    }, 1000);
+    }, 500);
     return;
   }
 
   // Load and play the full song directly on YouTube via search query
-  ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
+  ytPlayer.loadVideoByQuery(searchQuery);
   ytPlayer.setVolume(document.getElementById('audio-volume').value);
 }
 
