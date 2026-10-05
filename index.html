@@ -3,79 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interac Lesson Teachers Tracker</title>
+  <title>Lesson Tracker</title>
+  
   <link rel="stylesheet" href="styles.css">
-  <!-- SweetAlert2 for nice alerts -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- YouTube IFrame API -->
+  <!-- YouTube IFrame API Script (Required for audio player) -->
   <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-  <!-- Hidden YouTube Player Container -->
-  <div id="youtube-player-container" style="display:none;"></div>
-
-  <!-- Background Logo -->
-  <img src="https://via.placeholder.com/900x900.png?text=Logo" alt="Background Logo" class="bg-logo">
+  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
-    <!-- Spotify-Style Audio Player Card -->
-    <div class="audio-player-card">
-      <div class="player-top-row">
-        <div class="album-art-wrapper">
-          <img id="album-art" class="album-art-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%&#039; fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>" alt="Album Art">
+    <div class="search-container">
+      <h2>INTERAC LESSON TEACHERS TRACKER</h2>
+      <p id="date-range-note"></p>
+      
+      <!-- Audio Music Player Card -->
+      <div class="audio-player-card">
+        <div class="player-header">
+          <div class="vinyl-icon">🎵</div>
+          <div class="track-info">
+            <span id="track-title" class="track-title">Select a track</span>
+            <span id="track-artist" class="track-artist">Music Player Ready</span>
+          </div>
         </div>
-        <div class="player-info">
-          <div id="track-title" class="track-title">Select a Track</div>
-          <div id="track-artist" class="track-artist">No Artist</div>
-          <div id="track-album" class="track-album">Ready to Play</div>
-        </div>
-      </div>
 
-      <!-- Seeker Bar -->
-      <div class="player-seek-container">
-        <span id="current-time" class="time-label">0:00</span>
-        <input type="range" id="seek-slider" class="seek-slider" value="0" min="0" max="100" oninput="seekAudio(this.value)">
-        <span id="total-duration" class="time-label">0:00</span>
-      </div>
+        <!-- Hidden audio frame container that plays the track automatically -->
+        <div id="youtube-player-container" class="audio-iframe-hidden"></div>
 
-      <!-- Controls & Volume Row -->
-      <div class="player-controls-row">
-        <div class="player-controls">
-          <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
+        <!-- Music Search Bar Box -->
+        <div class="music-search-box">
+          <input type="text" id="music-search-input" placeholder="Search song or artist (e.g. Hev Abi)..." onkeydown="if(event.key === 'Enter') searchYouTubeVideos()">
+          <button onclick="searchYouTubeVideos()">🔍</button>
         </div>
-        <div class="audio-volume-wrapper">
-          <span class="volume-icon">🔊</span>
-          <input type="range" id="audio-volume" class="volume-slider" min="0" max="100" value="80" oninput="setAudioVolume(this.value)">
-        </div>
-      </div>
 
-      <!-- Music Search Bar Inside Card -->
-      <div class="music-search-box" style="position: relative;">
-        <input type="text" id="music-search-input" placeholder="Search song or artist..." oninput="searchYouTubeMusic()">
-        <button onclick="searchYouTubeMusic()">Search</button>
+        <!-- Search Results Dropdown Container -->
         <div id="music-search-results" class="music-search-results" style="display: none;"></div>
       </div>
-    </div>
 
-    <!-- Main Search Container -->
-    <div class="search-container">
-      <h2>Lesson Teachers Tracker</h2>
-      <div id="date-range-note">Loading date range...</div>
       <div class="search-box">
-        <input type="text" id="q" placeholder="Enter your name..." onkeypress="if(event.key === 'Enter') doSearch();">
+        <input type="text" id="q" placeholder="Enter Teacher Name (e.g., Lea)" onkeydown="if(event.key === 'Enter') doSearch()">
         <button onclick="doSearch()">Search</button>
       </div>
-      <small>Press search to view your assigned lessons for the next 2 weeks.</small>
+      <small>Type your Teacher's Name only (e.g., enter "Clayd", not "Teacher Clayd").</small>
+
+      <!-- Sticky Notes Board -->
+      <div class="sticky-notes-board">
+        <div class="sticky-note note-yellow">
+          <div class="pin"></div>
+          <h4>📌 Interac Cloud Access</h4>
+          <p>Regarding the available access period for the INTERAC Cloud website, the User ID and Password can be used from <strong>7:00 AM two days before</strong> the lesson until <strong>10:00 PM on the day after</strong> the lesson.</p>
+          <p style="margin-top: 6px; font-size: 11px;"><em>Example:</em> If the lesson is scheduled for September 8 at 10:00 AM, the User ID and Password will be valid from September 6 at 7:00 AM until September 9 at 10:00 PM.</p>
+        </div>
+        <div class="sticky-note note-pink">
+          <div class="pin"></div>
+          <h4>📌 Meeting Link inside Cloud</h4>
+          <p>The meeting link will only appear around <strong>10 - 5 minutes before</strong> the lesson time.</p>
+          <p style="margin-top: 6px;">Don't panic if the meeting link is still not at your cloud!!</p>
+        </div>
+      </div>
+
+      <!-- Backup Notice -->
+      <div class="backup-note-container">
+        <div class="backup-note">
+          *If you are a JP Back up or<br>
+          your lesson does not required interac cloud,<br>
+          the link is in <strong>Meeting Link</strong> section.
+        </div>
+        <img src="Yuha1.png" alt="Pointer" class="backup-pointer-img">
+      </div>
     </div>
 
-    <!-- Results Table Card -->
     <div id="results"></div>
   </div>
 
-  <!-- Minimalist Copyright Footer -->
   <footer class="site-footer">
-    <p>© 2026 Lesson Tracker System. All rights reserved.</p>
+    <p>© 2026 appleofyves_ • All Rights Reserved</p>
   </footer>
 
   <script src="script.js"></script>
