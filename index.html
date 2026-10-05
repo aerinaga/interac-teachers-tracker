@@ -11,8 +11,8 @@
   <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
-  <!-- jsmediatags CDN to read MP3 ID3 Tags & Album Art dynamically -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -24,32 +24,48 @@
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Mini Square Audio Player Widget -->
+      <!-- Spotify-Style Mini Audio Player Widget -->
       <div class="audio-player-card">
-        <div class="album-art-wrapper">
-          <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
-        </div>
-        
-        <div class="player-info">
-          <span id="track-title" class="track-title">Loading...</span>
-          <span id="track-artist" class="track-artist">Artist</span>
-          <span id="track-album" class="track-album">Album</span>
-        </div>
-
-        <div class="player-controls">
-          <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
-          
-          <select id="audio-track-select" class="track-select" onchange="onTrackSelectChange(this)">
-            <!-- Populated dynamically from script.js playlist array -->
-          </select>
+        <!-- Top Row: Art & Track Info -->
+        <div class="player-top-row">
+          <div class="album-art-wrapper">
+            <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
+          </div>
+          <div class="player-info">
+            <span id="track-title" class="track-title">Search a song below</span>
+            <span id="track-artist" class="track-artist">YouTube Player</span>
+          </div>
         </div>
 
-        <div class="audio-volume-wrapper">
-          <span class="volume-icon">🔊</span>
-          <input type="range" id="audio-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setAudioVolume(this.value)">
+        <!-- Middle Row: Seeker & Timestamps -->
+        <div class="player-seek-container">
+          <span id="current-time" class="time-label">0:00</span>
+          <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1" oninput="seekAudio(this.value)" onchange="seekAudio(this.value)">
+          <span id="total-duration" class="time-label">0:00</span>
         </div>
 
-        <audio id="main-audio-player" preload="none"></audio>
+        <!-- Bottom Row: Controls & Volume -->
+        <div class="player-controls-row">
+          <div class="player-controls">
+            <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
+          </div>
+          <div class="audio-volume-wrapper">
+            <span class="volume-icon">🔊</span>
+            <input type="range" id="audio-volume" class="volume-slider" min="0" max="100" value="50" oninput="setAudioVolume(this.value)">
+          </div>
+        </div>
+
+        <!-- Music Search Bar Box -->
+        <div class="music-search-box">
+          <input type="text" id="music-search-input" placeholder="Search song/artist..." onkeydown="if(event.key === 'Enter') searchYouTubeMusic()">
+          <button onclick="searchYouTubeMusic()">🔍</button>
+        </div>
+
+        <!-- Search Results Dropdown Container -->
+        <div id="music-search-results" class="music-search-results" style="display: none;"></div>
+
+        <!-- Hidden YouTube Player Container -->
+        <div id="youtube-player-container" style="display:none;"></div>
       </div>
 
       <div class="search-box">
