@@ -13,7 +13,7 @@ window.onload = function() {
   }
 };
 
-// Search YouTube videos via Invidious public API (supports local hip-hop / Hev Abi)
+// Search YouTube audio streams via Invidious API
 async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -23,7 +23,7 @@ async function searchYouTubeVideos() {
     return;
   }
 
-  resultsContainer.innerHTML = '<div class="music-search-item">Searching YouTube...</div>';
+  resultsContainer.innerHTML = '<div class="music-search-item">Searching tracks...</div>';
   resultsContainer.style.display = 'block';
 
   try {
@@ -39,35 +39,44 @@ async function searchYouTubeVideos() {
     data.slice(0, 15).forEach(video => {
       const item = document.createElement('div');
       item.className = 'music-search-item';
-      item.innerText = `${video.title} (${video.author})`;
+      item.innerText = `${video.title} - ${video.author}`;
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
         
-        // Update widget title and embed video directly into the player card
-        document.getElementById('track-title').innerText = `${video.title} - ${video.author}`;
+        // Update music player widget titles
+        document.getElementById('track-title').innerText = video.title;
+        document.getElementById('track-artist').innerText = video.author;
         
+        // Inject audio iframe to auto-play track in background
         const playerContainer = document.getElementById('youtube-player-container');
         playerContainer.innerHTML = `
           <iframe 
             src="https://www.youtube.com/embed/${video.videoId}?autoplay=1" 
-            title="${video.title}" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
+            allow="autoplay">
           </iframe>
         `;
       };
       resultsContainer.appendChild(item);
     });
   } catch (err) {
-    console.warn("YouTube search fallback", err);
+    console.warn("Music search fallback", err);
     resultsContainer.innerHTML = '';
     const fallbackItem = document.createElement('div');
     fallbackItem.className = 'music-search-item';
-    fallbackItem.innerText = `Search "${query}" directly on YouTube ↗`;
+    fallbackItem.innerText = `Play "${query}"`;
     fallbackItem.onclick = () => {
       resultsContainer.style.display = 'none';
-      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+      document.getElementById('track-title').innerText = query;
+      document.getElementById('track-artist').innerText = "Playing search audio";
+      
+      const playerContainer = document.getElementById('youtube-player-container');
+      playerContainer.innerHTML = `
+        <iframe 
+          src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1" 
+          allow="autoplay">
+        </iframe>
+      `;
     };
     resultsContainer.appendChild(fallbackItem);
   }
