@@ -2,13 +2,8 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// SVG placeholder fallback
-const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
-
 // --- YOUTUBE MINI PLAYER SYSTEM ---
 let ytPlayer = null;
-let seekInterval = null;
-let isUserSeeking = false;
 let isPlayerReady = false;
 
 window.onload = function() {
@@ -38,25 +33,13 @@ function onYouTubeIframeAPIReady() {
         isPlayerReady = true;
         console.log("YouTube Player is ready!");
       },
-      'onStateChange': onPlayerStateChange,
       'onError': (err) => console.warn("YouTube Player Error:", err)
     }
   });
 }
 
-function onPlayerStateChange(event) {
-  const playBtn = document.getElementById('audio-play-btn');
-  if (event.data == YT.PlayerState.PLAYING) {
-    if (playBtn) playBtn.innerText = '⏸';
-    startSeekTracker();
-  } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-    if (playBtn) playBtn.innerText = '▶';
-    stopSeekTracker();
-  }
-}
-
-// Search songs via iTunes API
-async function searchYouTubeMusic() {
+// Matches function name called in your HTML
+async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
   
@@ -65,15 +48,15 @@ async function searchYouTubeMusic() {
     return;
   }
 
-  resultsContainer.innerHTML = '<div class="music-search-item">Searching...</div>';
+  resultsContainer.innerHTML = '<div class="music-search-item" style="padding:8px; color:#fff;">Searching...</div>';
   resultsContainer.style.display = 'block';
 
   try {
-    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=15`);
     const data = await res.json();
 
     if (!data.results || data.results.length === 0) {
-      resultsContainer.innerHTML = '<div class="music-search-item">No tracks found</div>';
+      resultsContainer.innerHTML = '<div class="music-search-item" style="padding:8px; color:#fff;">No tracks found</div>';
       return;
     }
 
@@ -81,108 +64,47 @@ async function searchYouTubeMusic() {
     data.results.forEach(song => {
       const item = document.createElement('div');
       item.className = 'music-search-item';
+      item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 13px;';
       item.innerText = `${song.trackName} - ${song.artistName}`;
+      
+      item.onmouseover = () => item.style.background = 'rgba(255,255,255,0.1)';
+      item.onmouseout = () => item.style.background = 'transparent';
+
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName, song.collectionName || 'Single / Album', song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '600x600bb') : DEFAULT_COVER);
+        loadAndPlaySong(song.trackName, song.artistName);
       };
       resultsContainer.appendChild(item);
     });
   } catch (err) {
     console.warn("Search failed", err);
-    resultsContainer.innerHTML = '<div class="music-search-item">Search error</div>';
+    resultsContainer.innerHTML = '<div class="music-search-item" style="padding:8px; color:#fff;">Search error</div>';
   }
 }
 
-function loadAndPlaySong(title, artist, album, coverUrl) {
+function loadAndPlaySong(title, artist) {
   document.getElementById('track-title').innerText = title;
   document.getElementById('track-artist').innerText = artist;
-  document.getElementById('track-album').innerText = album;
-  document.getElementById('album-art').src = coverUrl;
 
   const searchQuery = `${title} ${artist} audio`;
 
   if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Initializing player, starting track...', showConfirmButton: false, timer: 1500 });
+    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Initializing player...', showConfirmButton: false, timer: 1500 });
     
-    // Retry loading once the player finishes initializing
     const checkReadyInterval = setInterval(() => {
       if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
         clearInterval(checkReadyInterval);
         isPlayerReady = true;
         ytPlayer.loadVideoByQuery(searchQuery);
-        ytPlayer.setVolume(document.getElementById('audio-volume').value);
+        ytPlayer.playVideo();
       }
     }, 500);
     return;
   }
 
-  // Load and play the full song directly on YouTube via search query
   ytPlayer.loadVideoByQuery(searchQuery);
-  ytPlayer.setVolume(document.getElementById('audio-volume').value);
-}
-
-function toggleAudioPlay() {
-  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-  try {
-    const state = ytPlayer.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-      ytPlayer.pauseVideo();
-    } else {
-      ytPlayer.playVideo();
-    }
-  } catch (e) {
-    console.warn("Toggle play error:", e);
-  }
-}
-
-function setAudioVolume(val) {
-  if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
-    ytPlayer.setVolume(val);
-  }
-}
-
-// Seeker Logic
-function startSeekTracker() {
-  stopSeekTracker();
-  seekInterval = setInterval(() => {
-    if (!ytPlayer || isUserSeeking || typeof ytPlayer.getCurrentTime !== 'function') return;
-    try {
-      const current = ytPlayer.getCurrentTime();
-      const duration = ytPlayer.getDuration();
-
-      if (duration > 0) {
-        const slider = document.getElementById('seek-slider');
-        slider.value = (current / duration) * 100;
-        document.getElementById('current-time').innerText = formatTime(current);
-        document.getElementById('total-duration').innerText = formatTime(duration);
-      }
-    } catch (e) {
-      // Ignore background ticker errors
-    }
-  }, 500);
-}
-
-function stopSeekTracker() {
-  if (seekInterval) clearInterval(seekInterval);
-}
-
-function seekAudio(val) {
-  isUserSeeking = true;
-  if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
-    const duration = ytPlayer.getDuration();
-    const newTime = (val / 100) * duration;
-    ytPlayer.seekTo(newTime, true);
-    document.getElementById('current-time').innerText = formatTime(newTime);
-  }
-  setTimeout(() => { isUserSeeking = false; }, 300);
-}
-
-function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  ytPlayer.playVideo();
 }
 
 // Close search dropdown when clicking outside
@@ -207,19 +129,7 @@ function confirmMaterial(url, materialName, timeStr, studentName, area) {
         You are going to use <b>"${materialName}"</b><br>
         for your <b>${timeStr}</b> lesson with <b>${studentName}</b> (${area}).
       </p>
-      <div style="
-        background: #f2f2f7; 
-        padding: 8px; 
-        border-radius: 8px; 
-        word-break: break-all; 
-        font-family: monospace; 
-        font-size: 11px; 
-        color: #0056b3; 
-        border: 1px solid #c7c7cc;
-        text-align: left;
-        font-weight: 700;
-        margin-top: 10px;
-      ">
+      <div style="background: #f2f2f7; padding: 8px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 11px; color: #0056b3; border: 1px solid #c7c7cc; text-align: left; font-weight: 700; margin-top: 10px;">
         ${url}
       </div>
     `,
@@ -242,19 +152,7 @@ function confirmMeeting(url, timeStr, studentName, area) {
       <p style="font-size: 13px; margin-bottom: 8px; color: #1c1c1e; font-weight: 600;">
         Please double check the destination URL before entering your <b>${timeStr}</b> lesson with <b>${studentName}</b> (${area}):
       </p>
-      <div style="
-        background: #f2f2f7; 
-        padding: 10px; 
-        border-radius: 8px; 
-        word-break: break-all; 
-        font-family: monospace; 
-        font-size: 11px; 
-        color: #0056b3; 
-        border: 1px solid #c7c7cc;
-        text-align: left;
-        font-weight: 700;
-        margin-top: 10px;
-      ">
+      <div style="background: #f2f2f7; padding: 10px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 11px; color: #0056b3; border: 1px solid #c7c7cc; text-align: left; font-weight: 700; margin-top: 10px;">
         ${url}
       </div>
     `,
@@ -278,19 +176,7 @@ function confirmGenericLink(url, label) {
       <p style="font-size: 13px; margin-bottom: 8px; color: #1c1c1e; font-weight: 600;">
         Opening destination for <b>${label}</b>:
       </p>
-      <div style="
-        background: #f2f2f7; 
-        padding: 8px; 
-        border-radius: 8px; 
-        word-break: break-all; 
-        font-family: monospace; 
-        font-size: 11px; 
-        color: #0056b3; 
-        border: 1px solid #c7c7cc;
-        text-align: left;
-        font-weight: 700;
-        margin-top: 10px;
-      ">
+      <div style="background: #f2f2f7; padding: 8px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 11px; color: #0056b3; border: 1px solid #c7c7cc; text-align: left; font-weight: 700; margin-top: 10px;">
         ${url}
       </div>
     `,
