@@ -27,7 +27,7 @@ function onYouTubeIframeAPIReady() {
     height: '0',
     width: '0',
     playerVars: {
-      'autoplay': 0,
+      'autoplay': 1,
       'controls': 0
     },
     events: {
@@ -41,13 +41,13 @@ function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING) {
     if (playBtn) playBtn.innerText = '⏸';
     startSeekTracker();
-  } else {
+  } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
     if (playBtn) playBtn.innerText = '▶';
     stopSeekTracker();
   }
 }
 
-// Search songs using a public search bridge / iTunes track search or alternative metadata to get full YT video ID
+// Search songs via iTunes API and automatically queue & play on YouTube
 async function searchYouTubeMusic() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -61,7 +61,6 @@ async function searchYouTubeMusic() {
   resultsContainer.style.display = 'block';
 
   try {
-    // We use iTunes Search API to match clean song/artist names, then load it into YouTube player
     const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
     const data = await res.json();
 
@@ -78,7 +77,7 @@ async function searchYouTubeMusic() {
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName, song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '600x600bb') : DEFAULT_COVER);
+        loadAndPlaySong(song.trackName, song.artistName, song.collectionName || 'Single / Album', song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '600x600bb') : DEFAULT_COVER);
       };
       resultsContainer.appendChild(item);
     });
@@ -88,9 +87,10 @@ async function searchYouTubeMusic() {
   }
 }
 
-async function loadAndPlaySong(title, artist, coverUrl) {
+function loadAndPlaySong(title, artist, album, coverUrl) {
   document.getElementById('track-title').innerText = title;
   document.getElementById('track-artist').innerText = artist;
+  document.getElementById('track-album').innerText = album;
   document.getElementById('album-art').src = coverUrl;
 
   if (!ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
@@ -98,7 +98,7 @@ async function loadAndPlaySong(title, artist, coverUrl) {
     return;
   }
 
-  // Search full song directly on YouTube via query search
+  // Load and play the full song directly on YouTube via search query
   ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
   ytPlayer.setVolume(document.getElementById('audio-volume').value);
 }
