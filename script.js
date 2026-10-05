@@ -11,7 +11,53 @@ window.onload = function() {
   if (noteElem) {
     noteElem.innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
   }
+
+  setupAudioPlayer();
 };
+
+function setupAudioPlayer() {
+  const audio = document.getElementById('html5-audio-player');
+  const volumeSlider = document.getElementById('volume-slider');
+  const seekSlider = document.getElementById('seek-slider');
+  const currentTimeElem = document.getElementById('current-time');
+  const totalDurationElem = document.getElementById('total-duration');
+
+  if (!audio) return;
+
+  if (volumeSlider) {
+    volumeSlider.oninput = (e) => {
+      audio.volume = e.target.value;
+    };
+  }
+
+  audio.ontimeupdate = () => {
+    if (audio.duration) {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      if (seekSlider) seekSlider.value = progress;
+      currentTimeElem.innerText = formatTime(audio.currentTime);
+    }
+  };
+
+  audio.onloadedmetadata = () => {
+    if (totalDurationElem) {
+      totalDurationElem.innerText = formatTime(audio.duration);
+    }
+  };
+
+  if (seekSlider) {
+    seekSlider.oninput = (e) => {
+      if (audio.duration) {
+        audio.currentTime = (e.target.value / 100) * audio.duration;
+      }
+    };
+  }
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
 
 async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
@@ -38,8 +84,15 @@ async function searchYouTubeVideos() {
     data.results.forEach(song => {
       const item = document.createElement('div');
       item.className = 'music-search-item';
-      item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 13px;';
-      item.innerText = `${song.trackName} - ${song.artistName}`;
+      item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 13px; display: flex; align-items: center; gap: 8px;';
+      
+      const thumbUrl = song.artworkUrl60 || '';
+      item.innerHTML = `
+        ${thumbUrl ? `<img src="${thumbUrl}" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover;">` : '🎵'}
+        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          <b>${song.trackName}</b> - ${song.artistName}
+        </div>
+      `;
       
       item.onmouseover = () => item.style.background = 'rgba(255,255,255,0.1)';
       item.onmouseout = () => item.style.background = 'transparent';
@@ -47,7 +100,7 @@ async function searchYouTubeVideos() {
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName, song.previewUrl);
+        loadAndPlaySong(song.trackName, song.artistName, song.previewUrl, song.artworkUrl100);
       };
       resultsContainer.appendChild(item);
     });
@@ -57,19 +110,24 @@ async function searchYouTubeVideos() {
   }
 }
 
-function loadAndPlaySong(title, artist, previewUrl) {
+function loadAndPlaySong(title, artist, previewUrl, artworkUrl) {
   document.getElementById('track-title').innerText = title;
   document.getElementById('track-artist').innerText = artist;
+
+  const artContainer = document.getElementById('album-art-container');
+  if (artContainer && artworkUrl) {
+    artContainer.innerHTML = `<img src="${artworkUrl}" style="width: 100%; height: 100%; border-radius: 6px; object-fit: cover;">`;
+  }
 
   const audioPlayer = document.getElementById('html5-audio-player');
   if (previewUrl) {
     audioPlayer.src = previewUrl;
     audioPlayer.play().catch(e => {
-      console.warn("Autoplay prevented or failed:", e);
-      Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Click anywhere on the page to enable audio', showConfirmButton: false, timer: 2000 });
+      console.warn("Autoplay restriction:", e);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Click player or search results to start audio', showConfirmButton: false, timer: 2000 });
     });
   } else {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Audio stream not available for this track', showConfirmButton: false, timer: 1500 });
+    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Audio preview not available', showConfirmButton: false, timer: 1500 });
   }
 }
 
