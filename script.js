@@ -33,12 +33,23 @@ function onYouTubeIframeAPIReady() {
         isPlayerReady = true;
         console.log("YouTube Player is ready!");
       },
+      'onStateChange': onPlayerStateChange,
       'onError': (err) => console.warn("YouTube Player Error:", err)
     }
   });
 }
 
-// Matches function name called in your HTML
+function onPlayerStateChange(event) {
+  const playBtn = document.getElementById('manual-play-btn');
+  if (!playBtn) return;
+  
+  if (event.data === YT.PlayerState.PLAYING) {
+    playBtn.innerText = '⏸ Pause';
+  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+    playBtn.innerText = '▶ Play';
+  }
+}
+
 async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -88,6 +99,7 @@ function loadAndPlaySong(title, artist) {
   document.getElementById('track-artist').innerText = artist;
 
   const searchQuery = `${title} ${artist} audio`;
+  const playBtn = document.getElementById('manual-play-btn');
 
   if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
     Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Initializing player...', showConfirmButton: false, timer: 1500 });
@@ -98,6 +110,7 @@ function loadAndPlaySong(title, artist) {
         isPlayerReady = true;
         ytPlayer.loadVideoByQuery(searchQuery);
         ytPlayer.playVideo();
+        if (playBtn) playBtn.innerText = '⏸ Pause';
       }
     }, 500);
     return;
@@ -105,6 +118,28 @@ function loadAndPlaySong(title, artist) {
 
   ytPlayer.loadVideoByQuery(searchQuery);
   ytPlayer.playVideo();
+  if (playBtn) playBtn.innerText = '⏸ Pause';
+}
+
+function togglePlayState() {
+  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
+    Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Player is still loading...', showConfirmButton: false, timer: 1500 });
+    return;
+  }
+  
+  const playBtn = document.getElementById('manual-play-btn');
+  try {
+    const state = ytPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+      if (playBtn) playBtn.innerText = '▶ Play';
+    } else {
+      ytPlayer.playVideo();
+      if (playBtn) playBtn.innerText = '⏸ Pause';
+    }
+  } catch (e) {
+    console.warn("Toggle play error:", e);
+  }
 }
 
 // Close search dropdown when clicking outside
