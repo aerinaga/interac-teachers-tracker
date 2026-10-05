@@ -2,10 +2,6 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// --- YOUTUBE MINI PLAYER SYSTEM ---
-let ytPlayer = null;
-let isPlayerReady = false;
-
 window.onload = function() {
   const today = new Date();
   const future = new Date();
@@ -16,39 +12,6 @@ window.onload = function() {
     noteElem.innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
   }
 };
-
-// Required callback for YouTube IFrame API
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('youtube-player-container', {
-    height: '1',
-    width: '1',
-    playerVars: {
-      'autoplay': 1,
-      'controls': 0,
-      'enablejsapi': 1,
-      'origin': window.location.origin
-    },
-    events: {
-      'onReady': (event) => {
-        isPlayerReady = true;
-        console.log("YouTube Player is ready!");
-      },
-      'onStateChange': onPlayerStateChange,
-      'onError': (err) => console.warn("YouTube Player Error:", err)
-    }
-  });
-}
-
-function onPlayerStateChange(event) {
-  const playBtn = document.getElementById('manual-play-btn');
-  if (!playBtn) return;
-  
-  if (event.data === YT.PlayerState.PLAYING) {
-    playBtn.innerText = '⏸ Pause';
-  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-    playBtn.innerText = '▶ Play';
-  }
-}
 
 async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
@@ -84,7 +47,7 @@ async function searchYouTubeVideos() {
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName);
+        loadAndPlaySong(song.trackName, song.artistName, song.previewUrl);
       };
       resultsContainer.appendChild(item);
     });
@@ -94,51 +57,19 @@ async function searchYouTubeVideos() {
   }
 }
 
-function loadAndPlaySong(title, artist) {
+function loadAndPlaySong(title, artist, previewUrl) {
   document.getElementById('track-title').innerText = title;
   document.getElementById('track-artist').innerText = artist;
 
-  const searchQuery = `${title} ${artist} audio`;
-  const playBtn = document.getElementById('manual-play-btn');
-
-  if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Initializing player...', showConfirmButton: false, timer: 1500 });
-    
-    const checkReadyInterval = setInterval(() => {
-      if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
-        clearInterval(checkReadyInterval);
-        isPlayerReady = true;
-        ytPlayer.loadVideoByQuery(searchQuery);
-        ytPlayer.playVideo();
-        if (playBtn) playBtn.innerText = '⏸ Pause';
-      }
-    }, 500);
-    return;
-  }
-
-  ytPlayer.loadVideoByQuery(searchQuery);
-  ytPlayer.playVideo();
-  if (playBtn) playBtn.innerText = '⏸ Pause';
-}
-
-function togglePlayState() {
-  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Player is still loading...', showConfirmButton: false, timer: 1500 });
-    return;
-  }
-  
-  const playBtn = document.getElementById('manual-play-btn');
-  try {
-    const state = ytPlayer.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-      ytPlayer.pauseVideo();
-      if (playBtn) playBtn.innerText = '▶ Play';
-    } else {
-      ytPlayer.playVideo();
-      if (playBtn) playBtn.innerText = '⏸ Pause';
-    }
-  } catch (e) {
-    console.warn("Toggle play error:", e);
+  const audioPlayer = document.getElementById('html5-audio-player');
+  if (previewUrl) {
+    audioPlayer.src = previewUrl;
+    audioPlayer.play().catch(e => {
+      console.warn("Autoplay prevented or failed:", e);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Click anywhere on the page to enable audio', showConfirmButton: false, timer: 2000 });
+    });
+  } else {
+    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Audio stream not available for this track', showConfirmButton: false, timer: 1500 });
   }
 }
 
