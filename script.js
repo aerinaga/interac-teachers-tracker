@@ -2,8 +2,6 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
-
 window.onload = function() {
   const today = new Date();
   const future = new Date();
@@ -15,7 +13,7 @@ window.onload = function() {
   }
 };
 
-// Search YouTube direct video suggestions via Invidious public API (wider variety, supports local hip-hop / Hev Abi)
+// Search YouTube videos via Invidious public API (supports local hip-hop / Hev Abi)
 async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -46,33 +44,23 @@ async function searchYouTubeVideos() {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
         
-        // Update widget UI
-        document.getElementById('track-title').innerText = video.title;
-        document.getElementById('track-artist').innerText = video.author;
-        if (video.videoThumbnails && video.videoThumbnails.length > 0) {
-          document.getElementById('album-art').src = video.videoThumbnails[0].url;
-        }
-
-        // Open full video in confirmation modal for smooth viewing/listening
-        Swal.fire({
-          title: 'Play Song',
-          html: `<p style="font-size:12px; font-weight:700;">Open <b>${video.title}</b> on YouTube?</p>`,
-          icon: 'success',
-          showCancelButton: true,
-          confirmButtonColor: '#af52de',
-          confirmButtonText: 'Play Now',
-          cancelButtonText: 'Cancel'
-        }).then(result => {
-          if (result.isConfirmed) {
-            window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
-          }
-        });
+        // Update widget title and embed video directly into the player card
+        document.getElementById('track-title').innerText = `${video.title} - ${video.author}`;
+        
+        const playerContainer = document.getElementById('youtube-player-container');
+        playerContainer.innerHTML = `
+          <iframe 
+            src="https://www.youtube.com/embed/${video.videoId}?autoplay=1" 
+            title="${video.title}" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        `;
       };
       resultsContainer.appendChild(item);
     });
   } catch (err) {
     console.warn("YouTube search fallback", err);
-    // Fallback search link directly to YouTube
     resultsContainer.innerHTML = '';
     const fallbackItem = document.createElement('div');
     fallbackItem.className = 'music-search-item';
