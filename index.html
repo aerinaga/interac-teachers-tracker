@@ -12,7 +12,7 @@
 </head>
 <body>
 
-  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
+  <img src="JP%2520Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
     <div class="search-container">
@@ -21,15 +21,19 @@
       
       <!-- Audio Music Player Card -->
       <div class="audio-player-card">
-        <div class="player-header">
-          <div class="vinyl-icon">🎵</div>
-          <div class="track-info">
-            <span id="track-title" class="track-title">Select a track</span>
-            <span id="track-artist" class="track-artist">Music Player Ready</span>
+        <div class="player-header" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="vinyl-icon">🎵</div>
+            <div class="track-info">
+              <span id="track-title" class="track-title">Select a track</span>
+              <span id="track-artist" class="track-artist">Music Player Ready</span>
+            </div>
           </div>
+          <!-- Manual Play/Pause Button to override browser autoplay blocks -->
+          <button id="manual-play-btn" onclick="togglePlayState()" style="background: #007aff; border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">▶ Play</button>
         </div>
 
-        <!-- Hidden audio frame container that plays the track automatically -->
+        <!-- Hidden audio frame container that plays the track -->
         <div id="youtube-player-container" class="audio-iframe-hidden"></div>
 
         <!-- Music Search Bar Box -->
