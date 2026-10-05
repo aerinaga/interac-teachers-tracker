@@ -10,25 +10,38 @@
 </head>
 <body>
 
-  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
+  <img src="JP%2520Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
     <div class="search-container">
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Audio Music Player Card (Original Clean Design) -->
+      <!-- Audio Music Player Card (Original Full Design) -->
       <div class="audio-player-card">
         <div class="player-header">
-          <div class="vinyl-icon">🎵</div>
+          <!-- Album Art / Vinyl Icon Display -->
+          <div id="album-art-container" class="vinyl-icon">🎵</div>
           <div class="track-info">
             <span id="track-title" class="track-title">Select a track</span>
             <span id="track-artist" class="track-artist">Music Player Ready</span>
           </div>
         </div>
 
-        <!-- Hidden HTML5 Audio Element for reliable playback -->
+        <!-- Hidden HTML5 Audio Element -->
         <audio id="html5-audio-player" preload="none"></audio>
+
+        <!-- Player Controls (Duration & Volume) -->
+        <div class="player-controls-bar">
+          <span id="current-time" class="time-display">0:00</span>
+          <input type="range" id="seek-slider" value="0" max="100" class="seek-slider">
+          <span id="total-duration" class="time-display">0:30</span>
+        </div>
+
+        <div class="volume-container">
+          <span class="vol-icon">🔊</span>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="volume-slider">
+        </div>
 
         <!-- Music Search Bar Box -->
         <div class="music-search-box">
