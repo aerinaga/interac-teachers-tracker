@@ -5,11 +5,71 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 // SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
-// --- YOUTUBE MINI PLAYER SYSTEM ---
-let ytPlayer = null;
-let seekInterval = null;
-let isUserSeeking = false;
-let isPlayerReady = false;
+// --- PLAYLIST CONFIGURATION (BROCKHAMPTON REMOVED) ---
+const playlistData = [
+  {
+    file: "Dijon - The Dress.mp3",
+    title: "The Dress",
+    artist: "Dijon",
+    album: "Absolutely"
+  },
+  {
+    file: "Lauv - Never Not.mp3",
+    title: "Never Not",
+    artist: "Lauv",
+    album: "I met you when I was 18."
+  },
+  {
+    file: "MAX, HUH YUNJIN - STUPID IN LOVE (feat. HUH YUNJIN of LE SSERAFIM).mp3",
+    title: "STUPID IN LOVE",
+    artist: "MAX, HUH YUNJIN",
+    album: "LOVE IN STEREO"
+  },
+  {
+    file: "MAX, keshi - IT'S YOU (feat. keshi).mp3",
+    title: "IT'S YOU (feat. keshi)",
+    artist: "MAX, keshi",
+    album: "LOVE IN STEREO"
+  },
+  {
+    file: "Mk.gee - I Want.mp3",
+    title: "I Want",
+    artist: "Mk.gee",
+    album: "Two Star & The Dream Police"
+  },
+  {
+    file: "RIIZE - Love 119.mp3",
+    title: "Love 119",
+    artist: "RIIZE",
+    album: "Love 119 - Single"
+  },
+  {
+    file: "starfall - intentions.mp3",
+    title: "intentions",
+    artist: "starfall",
+    album: "alone tonight - EP"
+  },
+  {
+    file: "XG - LEFT RIGHT.mp3",
+    title: "LEFT RIGHT",
+    artist: "XG",
+    album: "SHOOTING STAR"
+  },
+  {
+    file: "Yel - About Last Night...mp3",
+    title: "About Last Night...",
+    artist: "Yel",
+    album: "About Last Night..."
+  },
+  {
+    file: "Yel - GHOST.mp3",
+    title: "GHOST",
+    artist: "Yel",
+    album: "GHOST"
+  }
+];
+
+let trackMetadataCache = [];
 
 window.onload = function() {
   const today = new Date();
@@ -20,172 +80,166 @@ window.onload = function() {
   if (noteElem) {
     noteElem.innerHTML = `Displaying lessons from <b>${today.getDate()} ${months[today.getMonth()]}</b> to <b>${future.getDate()} ${months[future.getMonth()]}</b>`;
   }
+  
+  initAudioPlaylist();
 };
 
-// Required callback for YouTube IFrame API
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('youtube-player-container', {
-    height: '0',
-    width: '0',
-    playerVars: {
-      'autoplay': 1,
-      'controls': 0
-    },
-    events: {
-      'onReady': (event) => {
-        isPlayerReady = true;
-      },
-      'onStateChange': onPlayerStateChange
+// --- AUDIO PLAYER SYSTEM ---
+
+function initAudioPlaylist() {
+  const selectElem = document.getElementById('audio-track-select');
+  if (!selectElem) return;
+
+  selectElem.innerHTML = "";
+  trackMetadataCache = [];
+
+  playlistData.forEach((track, index) => {
+    const trackInfo = {
+      index: index,
+      url: encodeURIComponent(track.file).replace(/%2F/g, '/'),
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      coverUrl: track.coverUrl || DEFAULT_COVER
+    };
+
+    trackMetadataCache[index] = trackInfo;
+
+    const opt = document.createElement('option');
+    opt.value = index;
+    opt.text = trackInfo.title;
+    selectElem.appendChild(opt);
+
+    if (!track.coverUrl) {
+      fetchMetadataFromAPI(index);
     }
   });
-}
 
-function onPlayerStateChange(event) {
-  const playBtn = document.getElementById('audio-play-btn');
-  if (event.data == YT.PlayerState.PLAYING) {
-    if (playBtn) playBtn.innerText = '⏸';
-    startSeekTracker();
-  } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-    if (playBtn) playBtn.innerText = '▶';
-    stopSeekTracker();
+  if (trackMetadataCache.length > 0) {
+    loadTrackIntoUI(0, false);
   }
 }
 
-// Search songs with wider variety via iTunes API (limit increased to 25)
-async function searchYouTubeMusic() {
-  const query = document.getElementById('music-search-input').value.trim();
-  const resultsContainer = document.getElementById('music-search-results');
-  
-  if (!query) {
-    resultsContainer.style.display = 'none';
-    return;
-  }
+function fetchMetadataFromAPI(index) {
+  const info = trackMetadataCache[index];
+  if (!info) return;
 
-  resultsContainer.innerHTML = '<div class="music-search-item">Searching...</div>';
-  resultsContainer.style.display = 'block';
+  const term = encodeURIComponent(`${info.artist} ${info.title}`);
+  const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
-  try {
-    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`);
-    const data = await res.json();
-
-    if (!data.results || data.results.length === 0) {
-      resultsContainer.innerHTML = '<div class="music-search-item">No tracks found</div>';
-      return;
-    }
-
-    resultsContainer.innerHTML = '';
-    data.results.forEach(song => {
-      const item = document.createElement('div');
-      item.className = 'music-search-item';
-      item.innerText = `${song.trackName} - ${song.artistName}`;
-      item.onclick = () => {
-        resultsContainer.style.display = 'none';
-        document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName, song.collectionName || 'Single / Album', song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '600x600bb') : DEFAULT_COVER);
-      };
-      resultsContainer.appendChild(item);
-    });
-  } catch (err) {
-    console.warn("Search failed", err);
-    resultsContainer.innerHTML = '<div class="music-search-item">Search error</div>';
-  }
-}
-
-function loadAndPlaySong(title, artist, album, coverUrl) {
-  document.getElementById('track-title').innerText = title;
-  document.getElementById('track-artist').innerText = artist;
-  document.getElementById('track-album').innerText = album;
-  document.getElementById('album-art').src = coverUrl;
-
-  if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Player is initializing, please click play again in a second.', showConfirmButton: false, timer: 2000 });
-    // Attempt fallback init trigger
-    setTimeout(() => {
-      if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
-        isPlayerReady = true;
-        ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
-        ytPlayer.setVolume(document.getElementById('audio-volume').value);
+  fetch(queryUrl)
+    .then(res => res.json())
+    .then(data => {
+      if (data.results && data.results.length > 0) {
+        const result = data.results[0];
+        if (result.artworkUrl100) {
+          info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
+        }
+        if (result.collectionName) {
+          info.album = result.collectionName;
+        }
       }
-    }, 1000);
-    return;
+      updateTrackUIIfActive(index);
+    })
+    .catch(err => {
+      console.warn("iTunes API Fetch failed for index", index, err);
+    });
+}
+
+function updateTrackUIIfActive(index) {
+  const selectElem = document.getElementById('audio-track-select');
+  if (selectElem && parseInt(selectElem.value, 10) === index) {
+    const info = trackMetadataCache[index];
+    document.getElementById('track-title').innerText = info.title;
+    document.getElementById('track-artist').innerText = info.artist;
+    document.getElementById('track-album').innerText = info.album;
+    
+    const imgElem = document.getElementById('album-art');
+    if (imgElem) {
+      imgElem.src = info.coverUrl || DEFAULT_COVER;
+    }
+  }
+}
+
+function loadTrackIntoUI(index, autoPlay = false) {
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const selectElem = document.getElementById('audio-track-select');
+  const info = trackMetadataCache[index];
+
+  if (!info) return;
+
+  document.getElementById('track-title').innerText = info.title;
+  document.getElementById('track-artist').innerText = info.artist;
+  document.getElementById('track-album').innerText = info.album;
+  
+  const imgElem = document.getElementById('album-art');
+  if (imgElem) {
+    imgElem.onerror = function() {
+      this.onerror = null;
+      this.src = DEFAULT_COVER;
+    };
+    imgElem.src = info.coverUrl || DEFAULT_COVER;
   }
 
-  // Load and play the full song directly on YouTube via search query
-  ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
-  ytPlayer.setVolume(document.getElementById('audio-volume').value);
+  selectElem.value = index;
+  player.src = info.url;
+
+  if (autoPlay) {
+    player.play().then(() => {
+      if (playBtn) playBtn.innerText = '⏸';
+    }).catch(e => {
+      console.warn("Autoplay blocked:", e);
+    });
+  }
 }
 
 function toggleAudioPlay() {
-  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-  try {
-    const state = ytPlayer.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-      ytPlayer.pauseVideo();
-    } else {
-      ytPlayer.playVideo();
-    }
-  } catch (e) {
-    console.warn("Toggle play error:", e);
+  const player = document.getElementById('main-audio-player');
+  const playBtn = document.getElementById('audio-play-btn');
+  const selectElem = document.getElementById('audio-track-select');
+
+  if (!player.src || player.src === "" || player.src.endsWith('/')) {
+    loadTrackIntoUI(selectElem.value || 0, true);
+    return;
   }
+
+  if (player.paused) {
+    player.play();
+    playBtn.innerText = '⏸';
+  } else {
+    player.pause();
+    playBtn.innerText = '▶';
+  }
+}
+
+function onTrackSelectChange(selectElem) {
+  const selectedIndex = parseInt(selectElem.value, 10);
+  loadTrackIntoUI(selectedIndex, true);
 }
 
 function setAudioVolume(val) {
-  if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
-    ytPlayer.setVolume(val);
-  }
+  const player = document.getElementById('main-audio-player');
+  player.volume = val;
 }
 
-// Seeker Logic
-function startSeekTracker() {
-  stopSeekTracker();
-  seekInterval = setInterval(() => {
-    if (!ytPlayer || isUserSeeking || typeof ytPlayer.getCurrentTime !== 'function') return;
-    try {
-      const current = ytPlayer.getCurrentTime();
-      const duration = ytPlayer.getDuration();
+document.addEventListener('DOMContentLoaded', () => {
+  const player = document.getElementById('main-audio-player');
+  const selectElem = document.getElementById('audio-track-select');
+  const playBtn = document.getElementById('audio-play-btn');
 
-      if (duration > 0) {
-        const slider = document.getElementById('seek-slider');
-        slider.value = (current / duration) * 100;
-        document.getElementById('current-time').innerText = formatTime(current);
-        document.getElementById('total-duration').innerText = formatTime(duration);
+  if (player) {
+    player.addEventListener('ended', () => {
+      let nextIndex = parseInt(selectElem.value, 10) + 1;
+
+      if (nextIndex < playlistData.length) {
+        loadTrackIntoUI(nextIndex, true);
+      } else {
+        if (playBtn) playBtn.innerText = '▶';
       }
-    } catch (e) {
-      // Ignore background ticker errors
-    }
-  }, 500);
-}
-
-function stopSeekTracker() {
-  if (seekInterval) clearInterval(seekInterval);
-}
-
-function seekAudio(val) {
-  isUserSeeking = true;
-  if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
-    const duration = ytPlayer.getDuration();
-    const newTime = (val / 100) * duration;
-    ytPlayer.seekTo(newTime, true);
-    document.getElementById('current-time').innerText = formatTime(newTime);
-  }
-  setTimeout(() => { isUserSeeking = false; }, 300);
-}
-
-function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-
-// Close search dropdown when clicking outside
-document.addEventListener('click', (e) => {
-  const resultsContainer = document.getElementById('music-search-results');
-  const searchInput = document.getElementById('music-search-input');
-  if (resultsContainer && searchInput && !resultsContainer.contains(e.target) && e.target !== searchInput) {
-    resultsContainer.style.display = 'none';
+    });
   }
 });
-
 
 // --- GOOGLE SHEETS & LESSON TRACKER FUNCTIONS ---
 
