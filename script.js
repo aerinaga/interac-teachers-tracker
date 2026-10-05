@@ -9,6 +9,7 @@ const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/200
 let ytPlayer = null;
 let seekInterval = null;
 let isUserSeeking = false;
+let isPlayerReady = false;
 
 window.onload = function() {
   const today = new Date();
@@ -31,6 +32,9 @@ function onYouTubeIframeAPIReady() {
       'controls': 0
     },
     events: {
+      'onReady': (event) => {
+        isPlayerReady = true;
+      },
       'onStateChange': onPlayerStateChange
     }
   });
@@ -47,7 +51,7 @@ function onPlayerStateChange(event) {
   }
 }
 
-// Search songs via iTunes API and automatically queue & play on YouTube
+// Search songs with wider variety via iTunes API (limit increased to 25)
 async function searchYouTubeMusic() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
@@ -61,7 +65,7 @@ async function searchYouTubeMusic() {
   resultsContainer.style.display = 'block';
 
   try {
-    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`);
     const data = await res.json();
 
     if (!data.results || data.results.length === 0) {
@@ -93,8 +97,16 @@ function loadAndPlaySong(title, artist, album, coverUrl) {
   document.getElementById('track-album').innerText = album;
   document.getElementById('album-art').src = coverUrl;
 
-  if (!ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
+  if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
     Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Player is initializing, please click play again in a second.', showConfirmButton: false, timer: 2000 });
+    // Attempt fallback init trigger
+    setTimeout(() => {
+      if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
+        isPlayerReady = true;
+        ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
+        ytPlayer.setVolume(document.getElementById('audio-volume').value);
+      }
+    }, 1000);
     return;
   }
 
@@ -104,12 +116,16 @@ function loadAndPlaySong(title, artist, album, coverUrl) {
 }
 
 function toggleAudioPlay() {
-  if (!ytPlayer) return;
-  const state = ytPlayer.getPlayerState();
-  if (state === YT.PlayerState.PLAYING) {
-    ytPlayer.pauseVideo();
-  } else {
-    ytPlayer.playVideo();
+  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+  try {
+    const state = ytPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+    } else {
+      ytPlayer.playVideo();
+    }
+  } catch (e) {
+    console.warn("Toggle play error:", e);
   }
 }
 
@@ -123,15 +139,19 @@ function setAudioVolume(val) {
 function startSeekTracker() {
   stopSeekTracker();
   seekInterval = setInterval(() => {
-    if (!ytPlayer || isUserSeeking) return;
-    const current = ytPlayer.getCurrentTime();
-    const duration = ytPlayer.getDuration();
+    if (!ytPlayer || isUserSeeking || typeof ytPlayer.getCurrentTime !== 'function') return;
+    try {
+      const current = ytPlayer.getCurrentTime();
+      const duration = ytPlayer.getDuration();
 
-    if (duration > 0) {
-      const slider = document.getElementById('seek-slider');
-      slider.value = (current / duration) * 100;
-      document.getElementById('current-time').innerText = formatTime(current);
-      document.getElementById('total-duration').innerText = formatTime(duration);
+      if (duration > 0) {
+        const slider = document.getElementById('seek-slider');
+        slider.value = (current / duration) * 100;
+        document.getElementById('current-time').innerText = formatTime(current);
+        document.getElementById('total-duration').innerText = formatTime(duration);
+      }
+    } catch (e) {
+      // Ignore background ticker errors
     }
   }, 500);
 }
