@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lesson Tracker</title>
   
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
+  <!-- Background Watermark Logo -->
   <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
@@ -17,29 +24,49 @@
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Audio Music Player Card -->
+      <!-- Spotify-Style Mini Audio Player Widget -->
       <div class="audio-player-card">
-        <div class="player-header">
-          <div class="vinyl-icon">🎵</div>
-          <div class="track-info">
-            <span id="track-title" class="track-title">Select a track</span>
-            <span id="track-artist" class="track-artist">Music Player Ready</span>
+        <!-- Top Row: Art & Track Info -->
+        <div class="player-top-row">
+          <div class="album-art-wrapper">
+            <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
+          </div>
+          <div class="player-info">
+            <span id="track-title" class="track-title">Search a song below</span>
+            <span id="track-artist" class="track-artist">YouTube Player</span>
+            <span id="track-album" class="track-album">Album Name</span>
           </div>
         </div>
 
-        <!-- Hidden or compact embedded audio frame container -->
-        <div id="youtube-player-container" class="audio-iframe-hidden">
-          <!-- Iframe gets injected here to play audio silently/automatically -->
+        <!-- Middle Row: Seeker & Timestamps -->
+        <div class="player-seek-container">
+          <span id="current-time" class="time-label">0:00</span>
+          <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1" oninput="seekAudio(this.value)" onchange="seekAudio(this.value)">
+          <span id="total-duration" class="time-label">0:00</span>
+        </div>
+
+        <!-- Bottom Row: Controls & Volume -->
+        <div class="player-controls-row">
+          <div class="player-controls">
+            <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
+          </div>
+          <div class="audio-volume-wrapper">
+            <span class="volume-icon">🔊</span>
+            <input type="range" id="audio-volume" class="volume-slider" min="0" max="100" value="50" oninput="setAudioVolume(this.value)">
+          </div>
         </div>
 
         <!-- Music Search Bar Box -->
         <div class="music-search-box">
-          <input type="text" id="music-search-input" placeholder="Search song or artist (e.g. Hev Abi)..." onkeydown="if(event.key === 'Enter') searchYouTubeVideos()">
-          <button onclick="searchYouTubeVideos()">🔍</button>
+          <input type="text" id="music-search-input" placeholder="Search song/artist..." onkeydown="if(event.key === 'Enter') searchYouTubeMusic()">
+          <button onclick="searchYouTubeMusic()">🔍</button>
         </div>
 
         <!-- Search Results Dropdown Container -->
         <div id="music-search-results" class="music-search-results" style="display: none;"></div>
+
+        <!-- Hidden YouTube Player Container -->
+        <div id="youtube-player-container" style="display:none;"></div>
       </div>
 
       <div class="search-box">
@@ -64,7 +91,7 @@
         </div>
       </div>
 
-      <!-- Backup Notice -->
+      <!-- Two-Line Separated Backup Notice -->
       <div class="backup-note-container">
         <div class="backup-note">
           *If you are a JP Back up or<br>
@@ -75,13 +102,16 @@
       </div>
     </div>
 
+    <!-- Results Table Container -->
     <div id="results"></div>
   </div>
 
+  <!-- Clean Minimalist Footer -->
   <footer class="site-footer">
     <p>© 2026 appleofyves_ • All Rights Reserved</p>
   </footer>
 
+  <!-- Custom JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
