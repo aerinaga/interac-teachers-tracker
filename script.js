@@ -2,14 +2,7 @@ const SPREADSHEET_ID = "1QQ3pacCHrLiqhtsrheSZ_BopZabrLJ8qGyMZ4btftgs";
 const SHEET_TAB_NAME = "Lesson Info (UPDATED)"; 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
-
-// --- YOUTUBE MINI PLAYER SYSTEM ---
-let ytPlayer = null;
-let seekInterval = null;
-let isUserSeeking = false;
-let isPlayerReady = false;
 
 window.onload = function() {
   const today = new Date();
@@ -22,37 +15,8 @@ window.onload = function() {
   }
 };
 
-// Required callback for YouTube IFrame API
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('youtube-player-container', {
-    height: '0',
-    width: '0',
-    playerVars: {
-      'autoplay': 1,
-      'controls': 0
-    },
-    events: {
-      'onReady': (event) => {
-        isPlayerReady = true;
-      },
-      'onStateChange': onPlayerStateChange
-    }
-  });
-}
-
-function onPlayerStateChange(event) {
-  const playBtn = document.getElementById('audio-play-btn');
-  if (event.data == YT.PlayerState.PLAYING) {
-    if (playBtn) playBtn.innerText = '⏸';
-    startSeekTracker();
-  } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-    if (playBtn) playBtn.innerText = '▶';
-    stopSeekTracker();
-  }
-}
-
-// Search songs with wider variety via iTunes API (limit increased to 25)
-async function searchYouTubeMusic() {
+// Search YouTube direct video suggestions via Invidious public API (wider variety, supports local hip-hop / Hev Abi)
+async function searchYouTubeVideos() {
   const query = document.getElementById('music-search-input').value.trim();
   const resultsContainer = document.getElementById('music-search-results');
   
@@ -61,123 +25,66 @@ async function searchYouTubeMusic() {
     return;
   }
 
-  resultsContainer.innerHTML = '<div class="music-search-item">Searching...</div>';
+  resultsContainer.innerHTML = '<div class="music-search-item">Searching YouTube...</div>';
   resultsContainer.style.display = 'block';
 
   try {
-    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`);
+    const res = await fetch(`https://invidious.projectsegfau.lt/api/v1/search?q=${encodeURIComponent(query)}&type=video`);
     const data = await res.json();
 
-    if (!data.results || data.results.length === 0) {
+    if (!data || data.length === 0) {
       resultsContainer.innerHTML = '<div class="music-search-item">No tracks found</div>';
       return;
     }
 
     resultsContainer.innerHTML = '';
-    data.results.forEach(song => {
+    data.slice(0, 15).forEach(video => {
       const item = document.createElement('div');
       item.className = 'music-search-item';
-      item.innerText = `${song.trackName} - ${song.artistName}`;
+      item.innerText = `${video.title} (${video.author})`;
       item.onclick = () => {
         resultsContainer.style.display = 'none';
         document.getElementById('music-search-input').value = '';
-        loadAndPlaySong(song.trackName, song.artistName, song.collectionName || 'Single / Album', song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '600x600bb') : DEFAULT_COVER);
+        
+        // Update widget UI
+        document.getElementById('track-title').innerText = video.title;
+        document.getElementById('track-artist').innerText = video.author;
+        if (video.videoThumbnails && video.videoThumbnails.length > 0) {
+          document.getElementById('album-art').src = video.videoThumbnails[0].url;
+        }
+
+        // Open full video in confirmation modal for smooth viewing/listening
+        Swal.fire({
+          title: 'Play Song',
+          html: `<p style="font-size:12px; font-weight:700;">Open <b>${video.title}</b> on YouTube?</p>`,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonColor: '#af52de',
+          confirmButtonText: 'Play Now',
+          cancelButtonText: 'Cancel'
+        }).then(result => {
+          if (result.isConfirmed) {
+            window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
+          }
+        });
       };
       resultsContainer.appendChild(item);
     });
   } catch (err) {
-    console.warn("Search failed", err);
-    resultsContainer.innerHTML = '<div class="music-search-item">Search error</div>';
+    console.warn("YouTube search fallback", err);
+    // Fallback search link directly to YouTube
+    resultsContainer.innerHTML = '';
+    const fallbackItem = document.createElement('div');
+    fallbackItem.className = 'music-search-item';
+    fallbackItem.innerText = `Search "${query}" directly on YouTube ↗`;
+    fallbackItem.onclick = () => {
+      resultsContainer.style.display = 'none';
+      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+    };
+    resultsContainer.appendChild(fallbackItem);
   }
 }
 
-function loadAndPlaySong(title, artist, album, coverUrl) {
-  document.getElementById('track-title').innerText = title;
-  document.getElementById('track-artist').innerText = artist;
-  document.getElementById('track-album').innerText = album;
-  document.getElementById('album-art').src = coverUrl;
-
-  if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoByQuery !== 'function') {
-    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Player is initializing, please click play again in a second.', showConfirmButton: false, timer: 2000 });
-    // Attempt fallback init trigger
-    setTimeout(() => {
-      if (ytPlayer && typeof ytPlayer.loadVideoByQuery === 'function') {
-        isPlayerReady = true;
-        ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
-        ytPlayer.setVolume(document.getElementById('audio-volume').value);
-      }
-    }, 1000);
-    return;
-  }
-
-  // Load and play the full song directly on YouTube via search query
-  ytPlayer.loadVideoByQuery(`${title} ${artist} audio`);
-  ytPlayer.setVolume(document.getElementById('audio-volume').value);
-}
-
-function toggleAudioPlay() {
-  if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-  try {
-    const state = ytPlayer.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-      ytPlayer.pauseVideo();
-    } else {
-      ytPlayer.playVideo();
-    }
-  } catch (e) {
-    console.warn("Toggle play error:", e);
-  }
-}
-
-function setAudioVolume(val) {
-  if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
-    ytPlayer.setVolume(val);
-  }
-}
-
-// Seeker Logic
-function startSeekTracker() {
-  stopSeekTracker();
-  seekInterval = setInterval(() => {
-    if (!ytPlayer || isUserSeeking || typeof ytPlayer.getCurrentTime !== 'function') return;
-    try {
-      const current = ytPlayer.getCurrentTime();
-      const duration = ytPlayer.getDuration();
-
-      if (duration > 0) {
-        const slider = document.getElementById('seek-slider');
-        slider.value = (current / duration) * 100;
-        document.getElementById('current-time').innerText = formatTime(current);
-        document.getElementById('total-duration').innerText = formatTime(duration);
-      }
-    } catch (e) {
-      // Ignore background ticker errors
-    }
-  }, 500);
-}
-
-function stopSeekTracker() {
-  if (seekInterval) clearInterval(seekInterval);
-}
-
-function seekAudio(val) {
-  isUserSeeking = true;
-  if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
-    const duration = ytPlayer.getDuration();
-    const newTime = (val / 100) * duration;
-    ytPlayer.seekTo(newTime, true);
-    document.getElementById('current-time').innerText = formatTime(newTime);
-  }
-  setTimeout(() => { isUserSeeking = false; }, 300);
-}
-
-function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-
-// Close search dropdown when clicking outside
 document.addEventListener('click', (e) => {
   const resultsContainer = document.getElementById('music-search-results');
   const searchInput = document.getElementById('music-search-input');
