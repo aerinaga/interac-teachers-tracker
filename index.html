@@ -5,52 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lesson Tracker</title>
   
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- jsmediatags CDN to read MP3 ID3 Tags & Album Art dynamically -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 </head>
 <body>
 
-  <img src="JP%2520Logo.png" alt="Background Logo" class="bg-logo">
+  <!-- Background Watermark Logo -->
+  <img src="JP%20Logo.png" alt="Background Logo" class="bg-logo">
 
   <div class="page-wrapper">
     <div class="search-container">
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Audio Music Player Card (Original Full Design) -->
+      <!-- Mini Square Audio Player Widget -->
       <div class="audio-player-card">
-        <div class="player-header">
-          <!-- Album Art / Vinyl Icon Display -->
-          <div id="album-art-container" class="vinyl-icon">🎵</div>
-          <div class="track-info">
-            <span id="track-title" class="track-title">Select a track</span>
-            <span id="track-artist" class="track-artist">Music Player Ready</span>
-          </div>
+        <div class="album-art-wrapper">
+          <img id="album-art" src="JP%20Logo.png" alt="Album Cover" class="album-art-img">
+        </div>
+        
+        <div class="player-info">
+          <span id="track-title" class="track-title">Loading...</span>
+          <span id="track-artist" class="track-artist">Artist</span>
+          <span id="track-album" class="track-album">Album</span>
         </div>
 
-        <!-- Hidden HTML5 Audio Element -->
-        <audio id="html5-audio-player" preload="none"></audio>
-
-        <!-- Player Controls (Duration & Volume) -->
-        <div class="player-controls-bar">
-          <span id="current-time" class="time-display">0:00</span>
-          <input type="range" id="seek-slider" value="0" max="100" class="seek-slider">
-          <span id="total-duration" class="time-display">0:30</span>
+        <div class="player-controls">
+          <button id="audio-play-btn" class="audio-btn" onclick="toggleAudioPlay()">▶</button>
+          
+          <select id="audio-track-select" class="track-select" onchange="onTrackSelectChange(this)">
+            <!-- Populated dynamically from script.js playlist array -->
+          </select>
         </div>
 
-        <div class="volume-container">
-          <span class="vol-icon">🔊</span>
-          <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="volume-slider">
+        <div class="audio-volume-wrapper">
+          <span class="volume-icon">🔊</span>
+          <input type="range" id="audio-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setAudioVolume(this.value)">
         </div>
 
-        <!-- Music Search Bar Box -->
-        <div class="music-search-box">
-          <input type="text" id="music-search-input" placeholder="Search song or artist (e.g. Hev Abi)..." onkeydown="if(event.key === 'Enter') searchYouTubeVideos()">
-          <button onclick="searchYouTubeVideos()">🔍</button>
-        </div>
-
-        <!-- Search Results Dropdown Container -->
-        <div id="music-search-results" class="music-search-results" style="display: none;"></div>
+        <audio id="main-audio-player" preload="none"></audio>
       </div>
 
       <div class="search-box">
@@ -75,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Backup Notice -->
+      <!-- Two-Line Separated Backup Notice -->
       <div class="backup-note-container">
         <div class="backup-note">
           *If you are a JP Back up or<br>
@@ -86,13 +85,16 @@
       </div>
     </div>
 
+    <!-- Results Table Container -->
     <div id="results"></div>
   </div>
 
+  <!-- Clean Minimalist Footer -->
   <footer class="site-footer">
     <p>© 2026 appleofyves_ • All Rights Reserved</p>
   </footer>
 
+  <!-- Custom JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
