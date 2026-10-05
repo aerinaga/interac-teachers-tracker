@@ -17,22 +17,24 @@
       <h2>INTERAC LESSON TEACHERS TRACKER</h2>
       <p id="date-range-note"></p>
       
-      <!-- Embedded YouTube Player Card -->
+      <!-- Audio Music Player Card -->
       <div class="audio-player-card">
         <div class="player-header">
-          <span id="track-title" class="track-title">Search a song below</span>
+          <div class="vinyl-icon">🎵</div>
+          <div class="track-info">
+            <span id="track-title" class="track-title">Select a track</span>
+            <span id="track-artist" class="track-artist">Music Player Ready</span>
+          </div>
         </div>
 
-        <!-- Embedded YouTube Iframe Container -->
-        <div id="youtube-player-container" class="youtube-player-container">
-          <div class="player-placeholder">
-            <span>🎵 Player Ready</span>
-          </div>
+        <!-- Hidden or compact embedded audio frame container -->
+        <div id="youtube-player-container" class="audio-iframe-hidden">
+          <!-- Iframe gets injected here to play audio silently/automatically -->
         </div>
 
         <!-- Music Search Bar Box -->
         <div class="music-search-box">
-          <input type="text" id="music-search-input" placeholder="Search any song/artist (e.g. Hev Abi)..." onkeydown="if(event.key === 'Enter') searchYouTubeVideos()">
+          <input type="text" id="music-search-input" placeholder="Search song or artist (e.g. Hev Abi)..." onkeydown="if(event.key === 'Enter') searchYouTubeVideos()">
           <button onclick="searchYouTubeVideos()">🔍</button>
         </div>
 
