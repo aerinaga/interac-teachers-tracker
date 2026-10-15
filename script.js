@@ -142,17 +142,9 @@ function initAudioPlaylist() {
   trackMetadataCache = [];
 
   playlistData.forEach((track, index) => {
-    // Encodes characters while keeping valid path characters safe
-    const safeUrl = encodeURIComponent(track.file)
-      .replace(/%2F/g, '/')
-      .replace(/'/g, "%27")
-      .replace(/\(/g, "\%28") .replace(/\)/g, "%29")
-      .replace(/!/g, "%21")
-      .replace(/\*/g, "%2A");
-
     const trackInfo = {
       index: index,
-      url: safeUrl,
+      url: encodeURI(track.file),
       title: track.title,
       artist: track.artist,
       album: track.album,
@@ -165,29 +157,32 @@ function initAudioPlaylist() {
     opt.value = index;
     opt.text = trackInfo.title;
     selectElem.appendChild(opt);
+  });
 
+  // Load the first track into UI immediately so it never shows "Loading..."
+  if (trackMetadataCache.length > 0) {
+    loadTrackIntoUI(0, false);
+  }
+
+  // Fetch cover art asynchronously in background without blocking UI
+  playlistData.forEach((track, index) => {
     if (!track.coverUrl) {
       fetchMetadataFromAPI(index);
     }
   });
-
-  if (trackMetadataCache.length > 0) {
-    loadTrackIntoUI(0, false);
-  }
 }
 
 function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  // Clean title/artist search terms to prevent iTunes API syntax errors
-  const cleanTerm = `${info.artist} ${info.title}`.replace(/['"Ý̆]/g, "");
-  const queryUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanTerm)}&entity=song&limit=1`;
+  const cleanQuery = `${info.artist} ${info.title}`.replace(/[^\w\s]/gi, '');
+  const queryUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=song&limit=1`;
 
   fetch(queryUrl)
     .then(res => res.json())
     .then(data => {
-      if (data.results && data.results.length > 0) {
+      if (data && data.results && data.results.length > 0) {
         const result = data.results[0];
         if (result.artworkUrl100) {
           info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
@@ -199,7 +194,7 @@ function fetchMetadataFromAPI(index) {
       updateTrackUIIfActive(index);
     })
     .catch(err => {
-      console.warn("iTunes API Fetch failed for index", index, err);
+      console.warn("iTunes API Fetch soft-failed for index", index, err);
       updateTrackUIIfActive(index);
     });
 }
@@ -208,6 +203,8 @@ function updateTrackUIIfActive(index) {
   const selectElem = document.getElementById('audio-track-select');
   if (selectElem && parseInt(selectElem.value, 10) === index) {
     const info = trackMetadataCache[index];
+    if (!info) return;
+
     document.getElementById('track-title').innerText = info.title;
     document.getElementById('track-artist').innerText = info.artist;
     document.getElementById('track-album').innerText = info.album;
@@ -278,7 +275,7 @@ function onTrackSelectChange(selectElem) {
 
 function setAudioVolume(val) {
   const player = document.getElementById('main-audio-player');
-  player.volume = val;
+  if (player) player.volume = val;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -509,12 +506,4 @@ async function doSearch() {
             rowVals[4],     // 4: LESSON TYPE
             rowVals[5],     // 5: Area (BoE)
             rowVals[6],     // 6: SCHOOL
-            rowVals[7],     // 7: GRADE
-            rowVals[8],     // 8: CLASS
-            rowVals[9],     // 9: STUDENT'S NAME
-            rowVals[10],    // 10: USER ID
-            rowVals[11],    // 11: PASSWORD
-            rowVals[12],    // 12: TEACHER'S NAME
-            finalCloudLink, // 13: TEACHER'S CLOUD LINK
-            rowVals[13],    // 14: MATERIAL
-            rowVals[14],    // 15:
+            rowVals[7],     //
