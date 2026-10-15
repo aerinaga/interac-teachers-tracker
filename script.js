@@ -105,8 +105,8 @@ const playlistData = [
   },
   {
     file: "DENȲ, Just Hush, Third Flo' - Alam Ko Na.mp3",
-    // Manually override the URL with pre-encoded characters so GitHub finds it instantly
-    customUrl: "DEN%C8%B9%2C%20Just%20Hush%2C%20Third%20Flo%27%20-%20Alam%20Ko%20Na.mp3",
+    // Clean ASCII override pointing to your exact GitHub file path
+    customUrl: encodeURIComponent("DENY, Just Hush, Third Flo - Alam Ko Na.mp3"),
     title: "Alam Ko Na",
     artist: "DENȲ, Just Hush, Third Flo'",
     album: "LOVES7AGE"
@@ -144,7 +144,6 @@ function initAudioPlaylist() {
   trackMetadataCache = [];
 
   playlistData.forEach((track, index) => {
-    // Use manual customUrl if provided, otherwise safely encode the filename
     const safeUrl = track.customUrl ? track.customUrl : encodeURIComponent(track.file).replace(/%2F/g, '/');
 
     const trackInfo = {
@@ -195,7 +194,6 @@ function fetchMetadataFromAPI(index) {
           info.album = result.collectionName;
         }
       }
-      // Force correct album override for Alam Ko Na
       if (info.title === "Alam Ko Na") {
         info.album = "LOVES7AGE";
       }
