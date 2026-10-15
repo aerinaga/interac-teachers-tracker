@@ -144,7 +144,7 @@ function initAudioPlaylist() {
   playlistData.forEach((track, index) => {
     const trackInfo = {
       index: index,
-      url: encodeURI(track.file),
+      url: encodeURIComponent(track.file).replace(/%2F/g, '/'),
       title: track.title,
       artist: track.artist,
       album: track.album,
@@ -159,12 +159,10 @@ function initAudioPlaylist() {
     selectElem.appendChild(opt);
   });
 
-  // Load the first track into UI immediately so it never shows "Loading..."
   if (trackMetadataCache.length > 0) {
     loadTrackIntoUI(0, false);
   }
 
-  // Fetch cover art asynchronously in background without blocking UI
   playlistData.forEach((track, index) => {
     if (!track.coverUrl) {
       fetchMetadataFromAPI(index);
@@ -176,8 +174,8 @@ function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  const cleanQuery = `${info.artist} ${info.title}`.replace(/[^\w\s]/gi, '');
-  const queryUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=song&limit=1`;
+  const term = encodeURIComponent(`${info.artist} ${info.title}`);
+  const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
   fetch(queryUrl)
     .then(res => res.json())
@@ -194,7 +192,7 @@ function fetchMetadataFromAPI(index) {
       updateTrackUIIfActive(index);
     })
     .catch(err => {
-      console.warn("iTunes API Fetch soft-failed for index", index, err);
+      console.warn("iTunes API Fetch failed for index", index, err);
       updateTrackUIIfActive(index);
     });
 }
