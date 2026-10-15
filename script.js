@@ -5,7 +5,7 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 // SVG placeholder fallback
 const DEFAULT_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231c1c1e'/><text x='50%' y='50%' fill='%23ffffff' font-size='24' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>🎵</text></svg>";
 
-// --- PLAYLIST CONFIGURATION (BROCKHAMPTON REMOVED) ---
+// --- PLAYLIST CONFIGURATION ---
 const playlistData = [
   {
     file: "Dijon - The Dress.mp3",
@@ -66,6 +66,49 @@ const playlistData = [
     title: "GHOST",
     artist: "Yel",
     album: "GHOST"
+  },
+  // --- Newly Added Songs ---
+  {
+    file: "DIMO REX - SAY MY NAME.mp3",
+    title: "SAY MY NAME",
+    artist: "DIMO REX",
+    album: "ANTIDOTE"
+  },
+  {
+    file: "Ellie Goulding, Diplo, Red Velvet - Close To Me - Red Velvet Remix.mp3",
+    title: "Close To Me (Red Velvet Remix)",
+    artist: "Ellie Goulding, Diplo, Red Velvet",
+    album: "Close To Me"
+  },
+  {
+    file: "ADÉLA - Ain't In LA.mp3",
+    title: "Ain't In LA",
+    artist: "ADÉLA",
+    album: "PRIMA"
+  },
+  {
+    file: "ADÉLA - Nicole Kidman.mp3",
+    title: "Nicole Kidman",
+    artist: "ADÉLA",
+    album: "PRIMA"
+  },
+  {
+    file: "RAPROJECT SIX - Eyes Can't Lie.mp3",
+    title: "Eyes Can't Lie",
+    artist: "RAPROJECT SIX",
+    album: "Eyes Can't Lie"
+  },
+  {
+    file: "RAPROJECT SIX, MADAM SAUCE - Baby 123.mp3",
+    title: "Baby 123",
+    artist: "RAPROJECT SIX, MADAM SAUCE",
+    album: "Baby 123"
+  },
+  {
+    file: "DENY̆, Just Hush, Third Flo' - Alam Ko Na.mp3",
+    title: "Alam Ko Na",
+    artist: "DENY̆, Just Hush, Third Flo'",
+    album: "Alam Ko Na"
   }
 ];
 
