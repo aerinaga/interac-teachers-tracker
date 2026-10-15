@@ -506,4 +506,153 @@ async function doSearch() {
             rowVals[4],     // 4: LESSON TYPE
             rowVals[5],     // 5: Area (BoE)
             rowVals[6],     // 6: SCHOOL
-            rowVals[7],     //
+            rowVals[7],     // 7: GRADE
+            rowVals[8],     // 8: CLASS
+            rowVals[9],     // 9: STUDENT'S NAME
+            rowVals[10],    // 10: USER ID
+            rowVals[11],    // 11: PASSWORD
+            rowVals[12],    // 12: TEACHER'S NAME
+            finalCloudLink, // 13: TEACHER'S CLOUD LINK
+            rowVals[13],    // 14: MATERIAL
+            rowVals[14],    // 15: MATERIAL URL
+            rowVals[15],    // 16: FEEDBACK LINK
+            rowVals[16]     // 17: MEETING LINK
+          ]);
+        }
+      }
+    });
+
+    if (matchedRows.length === 0) {
+      Swal.fire({ 
+        icon: 'info', 
+        title: 'No Lessons Found', 
+        text: `No lessons found for "${q}" within the next 2 weeks on tab "${SHEET_TAB_NAME}".` 
+      });
+      document.getElementById('results').innerHTML = "";
+      return;
+    }
+
+    Swal.close();
+    render(matchedRows);
+
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    Swal.fire({ 
+      icon: 'error', 
+      title: 'Access Denied / Network Error', 
+      text: 'Make sure your Google Sheet access is set to "Anyone with the link can view".' 
+    });
+  }
+}
+
+function render(rows) {
+  const now = new Date();
+  
+  const headers = [
+    "STATUS", "DATE", "ACCESS", "START", "END", "LESSON TYPE", 
+    "Area (BoE)", "SCHOOL", "GRADE", "CLASS", "STUDENT'S NAME / MEETING GROUP", 
+    "USER ID", "PASSWORD", "TEACHER'S NAME", "TEACHER'S CLOUD LINK", 
+    "MATERIAL", "MATERIAL URL", "FEEDBACK LINK", "MEETING LINK"
+  ];
+
+  let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+
+  rows.forEach((r, rowIndex) => {
+    const rawDateStr = String(r[0]); 
+    let lessonEnd = new Date();
+
+    const lessonDateObj = parseSheetDate(rawDateStr);
+    if (lessonDateObj) {
+      const endHour = r[3] ? parseInt(String(r[3]).split(':')[0]) : 0;
+      const endMin = r[3] ? parseInt(String(r[3]).split(':')[1]) : 0;
+      lessonEnd = new Date(lessonDateObj.getFullYear(), lessonDateObj.getMonth(), lessonDateObj.getDate(), endHour, endMin);
+    }
+
+    const fullTimeStr = `${r[1]} ${r[2]}~${r[3]}`;
+    const isFinished = lessonEnd < now;
+    const rowClass = isFinished ? 'class="finished-row"' : '';
+    const badge = isFinished ? '<span class="badge badge-finished">FINISHED</span>' : '<span class="badge badge-upcoming">UPCOMING</span>';
+
+    html += `<tr ${rowClass}><td>${badge}</td>`;
+
+    r.forEach((cell, i) => {
+      let content = String(cell || "").trim();
+      const boldClass = (i >= 0 && i <= 3) ? 'class="bold-col"' : '';
+
+      if (i === 13) { 
+        if (content.startsWith('http')) {
+          const btnId = `cloud-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">LINK</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmMeeting(content, fullTimeStr, r[9], r[5]);
+          }, 0);
+        } else {
+          html += `<td>-</td>`;
+        }
+      } else if (i === 15) { 
+        if (isFinished) {
+          html += `<td><span class="btn-link btn-disabled">CLOSED</span></td>`;
+        } else if (content) {
+          const urls = content.match(/https?:\/\/[^\s]+/g);
+          if (urls && urls.length > 0) {
+            let cellId = `material-cell-${rowIndex}`;
+            html += `<td id="${cellId}"></td>`;
+            setTimeout(() => {
+              const cellTd = document.getElementById(cellId);
+              if (cellTd) {
+                cellTd.innerHTML = '';
+                urls.forEach((u, idx) => {
+                  const cleanUrl = u.trim().replace(/['"]/g, '');
+                  const btn = document.createElement('button');
+                  btn.className = 'btn-link';
+                  btn.style.cssText = 'margin: 3px 0; display: block;';
+                  btn.innerText = `OPEN ${idx + 1}`;
+                  btn.onclick = () => confirmMaterial(cleanUrl, r[14] || 'Material', fullTimeStr, r[9], r[5]);
+                  cellTd.appendChild(btn);
+                });
+              }
+            }, 0);
+          } else {
+            html += `<td>-</td>`;
+          }
+        } else {
+          html += `<td>-</td>`;
+        }
+      } else if (i === 16) { 
+        if (content.startsWith('http')) {
+          const btnId = `feedback-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmGenericLink(content, 'Feedback Link');
+          }, 0);
+        } else {
+          html += `<td>No Feedback</td>`;
+        }
+      } else if (i === 17) { 
+        if (content.startsWith('http')) {
+          const btnId = `urllink-btn-${rowIndex}`;
+          html += `<td><button id="${btnId}" class="btn-link">OPEN</button></td>`;
+          setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.onclick = () => confirmGenericLink(content, 'Meeting Link');
+          }, 0);
+        } else {
+          html += `<td>-</td>`;
+        }
+      } else if (content.startsWith('http')) { 
+        const btnId = `generic-btn-${rowIndex}-${i}`;
+        html += `<td><button id="${btnId}" class="btn-link">LINK</button></td>`;
+        setTimeout(() => {
+          const btn = document.getElementById(btnId);
+          if (btn) btn.onclick = () => confirmMeeting(content, fullTimeStr, r[9], r[5]);
+        }, 0);
+      } else { 
+        html += `<td ${boldClass}>${content || "-"}</td>`; 
+      }
+    });
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html + '</tbody></table>';
+}
