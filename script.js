@@ -107,7 +107,7 @@ const playlistData = [
     file: "DENY̆, Just Hush, Third Flo' - Alam Ko Na.mp3",
     title: "Alam Ko Na",
     artist: "DENY̆, Just Hush, Third Flo'",
-    album: "Alam Ko Na"
+    album: "LOVES7AGE"
   },
   {
     file: "Mariah Deborah - Na Para Bang.mp3",
@@ -142,9 +142,12 @@ function initAudioPlaylist() {
   trackMetadataCache = [];
 
   playlistData.forEach((track, index) => {
+    // Correctly encodes GitHub path while preserving folder structures
+    const safeUrl = encodeURIComponent(track.file).replace(/%2F/g, '/');
+
     const trackInfo = {
       index: index,
-      url: encodeURIComponent(track.file).replace(/%2F/g, '/'),
+      url: safeUrl,
       title: track.title,
       artist: track.artist,
       album: track.album,
@@ -174,7 +177,9 @@ function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  const term = encodeURIComponent(`${info.artist} ${info.title}`);
+  // Clean special diacritics for iTunes search query compatibility
+  const cleanArtist = info.artist.replace(/[̆]/g, '');
+  const term = encodeURIComponent(`${cleanArtist} ${info.title}`);
   const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
   fetch(queryUrl)
@@ -185,7 +190,8 @@ function fetchMetadataFromAPI(index) {
         if (result.artworkUrl100) {
           info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
         }
-        if (result.collectionName) {
+        // Keep user-defined album if specifically set (like LOVES7AGE), otherwise fallback to API
+        if (result.collectionName && info.album === info.title) {
           info.album = result.collectionName;
         }
       }
