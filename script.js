@@ -104,9 +104,9 @@ const playlistData = [
     album: "Baby 123"
   },
   {
-    file: "DENY, Just Hush, Third Flo - Alam Ko Na.mp3",
+    file: "DENY - Alam Ko Na.mp3",
     title: "Alam Ko Na",
-    artist: "DENY, Just Hush, Third Flo",
+    artist: "DENȲ, Just Hush, Third Flo'",
     album: "LOVES7AGE"
   },
   {
