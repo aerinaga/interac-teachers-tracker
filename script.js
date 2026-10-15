@@ -104,9 +104,11 @@ const playlistData = [
     album: "Baby 123"
   },
   {
-    file: "DENY̆, Just Hush, Third Flo' - Alam Ko Na.mp3",
+    file: "DENȲ, Just Hush, Third Flo' - Alam Ko Na.mp3",
+    // Manually override the URL with pre-encoded characters so GitHub finds it instantly
+    customUrl: "DEN%C8%B9%2C%20Just%20Hush%2C%20Third%20Flo%27%20-%20Alam%20Ko%20Na.mp3",
     title: "Alam Ko Na",
-    artist: "DENY̆, Just Hush, Third Flo'",
+    artist: "DENȲ, Just Hush, Third Flo'",
     album: "LOVES7AGE"
   },
   {
@@ -142,8 +144,8 @@ function initAudioPlaylist() {
   trackMetadataCache = [];
 
   playlistData.forEach((track, index) => {
-    // Correctly encodes GitHub path while preserving folder structures
-    const safeUrl = encodeURIComponent(track.file).replace(/%2F/g, '/');
+    // Use manual customUrl if provided, otherwise safely encode the filename
+    const safeUrl = track.customUrl ? track.customUrl : encodeURIComponent(track.file).replace(/%2F/g, '/');
 
     const trackInfo = {
       index: index,
@@ -177,8 +179,7 @@ function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  // Clean special diacritics for iTunes search query compatibility
-  const cleanArtist = info.artist.replace(/[̆]/g, '');
+  const cleanArtist = info.artist.replace(/[Ȳ̆]/g, 'Y');
   const term = encodeURIComponent(`${cleanArtist} ${info.title}`);
   const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
@@ -190,15 +191,21 @@ function fetchMetadataFromAPI(index) {
         if (result.artworkUrl100) {
           info.coverUrl = result.artworkUrl100.replace('100x100bb', '600x600bb');
         }
-        // Keep user-defined album if specifically set (like LOVES7AGE), otherwise fallback to API
         if (result.collectionName && info.album === info.title) {
           info.album = result.collectionName;
         }
+      }
+      // Force correct album override for Alam Ko Na
+      if (info.title === "Alam Ko Na") {
+        info.album = "LOVES7AGE";
       }
       updateTrackUIIfActive(index);
     })
     .catch(err => {
       console.warn("iTunes API Fetch failed for index", index, err);
+      if (info.title === "Alam Ko Na") {
+        info.album = "LOVES7AGE";
+      }
       updateTrackUIIfActive(index);
     });
 }
