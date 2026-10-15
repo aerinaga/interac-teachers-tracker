@@ -104,11 +104,9 @@ const playlistData = [
     album: "Baby 123"
   },
   {
-    file: "DENȲ, Just Hush, Third Flo' - Alam Ko Na.mp3",
-    // Clean ASCII override pointing to your exact GitHub file path
-    customUrl: encodeURIComponent("DENY, Just Hush, Third Flo - Alam Ko Na.mp3"),
+    file: "DENY, Just Hush, Third Flo - Alam Ko Na.mp3",
     title: "Alam Ko Na",
-    artist: "DENȲ, Just Hush, Third Flo'",
+    artist: "DENY, Just Hush, Third Flo",
     album: "LOVES7AGE"
   },
   {
@@ -144,7 +142,7 @@ function initAudioPlaylist() {
   trackMetadataCache = [];
 
   playlistData.forEach((track, index) => {
-    const safeUrl = track.customUrl ? track.customUrl : encodeURIComponent(track.file).replace(/%2F/g, '/');
+    const safeUrl = encodeURIComponent(track.file).replace(/%2F/g, '/');
 
     const trackInfo = {
       index: index,
@@ -178,8 +176,7 @@ function fetchMetadataFromAPI(index) {
   const info = trackMetadataCache[index];
   if (!info) return;
 
-  const cleanArtist = info.artist.replace(/[Ȳ̆]/g, 'Y');
-  const term = encodeURIComponent(`${cleanArtist} ${info.title}`);
+  const term = encodeURIComponent(`${info.artist} ${info.title}`);
   const queryUrl = `https://itunes.apple.com/search?term=${term}&entity=song&limit=1`;
 
   fetch(queryUrl)
