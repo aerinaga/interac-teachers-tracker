@@ -105,6 +105,12 @@ const playlistData = [
     album: "Baby 123"
   },
   {
+    file: "Mariah Deborah - Na Para Bang.mp3",
+    title: "Na Para Bang",
+    artist: "Mariah Deborah'",
+    album: "Na Para Bang"
+  }
+  {
     file: "DENY̆, Just Hush, Third Flo' - Alam Ko Na.mp3",
     title: "Alam Ko Na",
     artist: "DENY̆, Just Hush, Third Flo'",
